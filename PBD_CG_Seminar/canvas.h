@@ -5,8 +5,12 @@
 #include <QGLWidget>
 #include <QGLFunctions>
 #include <QGLBuffer>
+#include <QOpenGLVertexArrayObject>
 #include <QGLShaderProgram>
 #include <glm/glm.hpp>
+
+#include "light.h"
+#include "model.h"
 
 class Canvas : public QGLWidget
 {
@@ -32,11 +36,11 @@ private:
     void solveJacobi();
     bool prepareShader(const QString& vertexShaderPath,const QString& fragmentShaderPath);
 
-    unsigned int vao;
-
     QGLFunctions* extFunctions;
     QTimer updateTimer;
 
+    Model model;
+    QOpenGLVertexArrayObject vao;
     QGLBuffer vertexBuffer;
     QGLShaderProgram shader;
 

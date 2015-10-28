@@ -18,19 +18,26 @@ SOURCES += main.cpp\
     light.cpp \
     vertex.cpp \
     camera.cpp \
-    constraintparameters.cpp
+    constraintparameters.cpp \
+    model.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
     light.h \
     vertex.h \
     camera.h \
-    constraintparameters.h
+    constraintparameters.h \
+    model.h
 
 FORMS    += mainwindow.ui
 
-LIBS     += -lGLEW
+LIBS     += -lGLEW -lassimp
 
 OTHER_FILES += \
     frag.glsl \
     vert.glsl
+
+CONFIG += c++11
+
+QMAKE_CXXFLAGS+= -fopenmp
+QMAKE_LFLAGS +=  -fopenmp

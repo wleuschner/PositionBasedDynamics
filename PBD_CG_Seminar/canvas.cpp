@@ -27,32 +27,47 @@ void Canvas::initializeGL()
     {
         qWarning()<<"Could not init GLEW";
     }
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     glClearColor(0.0,0.0,0.0,1.0);
+
     if(!prepareShader("../PBD_CG_Seminar/vert.glsl","../PBD_CG_Seminar/frag.glsl"))
     {
         return;
     }
-    float points[] = { -0.5f,-0.5f,-2.0f,1.0f,
-                       0.5f,-0.5f,-2.0f,1.0f,
-                       0.0f,0.5f,-2.0f,1.0f};
-    glGenVertexArrays(1,&vao);
-    glBindVertexArray(vao);
-    vertexBuffer.create();
-    vertexBuffer.setUsagePattern(QGLBuffer::StaticDraw);
-    if(!vertexBuffer.bind())
-    {
-        qWarning()<<"Could not bind vertex buffer";
-        return;
-    }
-    vertexBuffer.allocate(points,3*4*sizeof(float));
-    if(!shader.bind())
-    {
-        qWarning()<<"Could not bind shader";
-        return;
-    }
-    shader.setAttributeBuffer("vertex",GL_FLOAT,0,4);
+
+    vao.create();
+    vao.bind();
+    model.load("/home/wladimir/Model/Pool/Pool\ Table.3DS");
+
+    shader.setAttributeBuffer("vertex",GL_FLOAT,0,3,sizeof(Vertex));
     shader.enableAttributeArray("vertex");
+
+    shader.setAttributeBuffer("normal",GL_FLOAT,sizeof(float)*3,3,sizeof(Vertex));
+    shader.enableAttributeArray("normal");
+
+    shader.setAttributeBuffer("uv",GL_FLOAT,sizeof(float)*6,2,sizeof(Vertex));
+    shader.enableAttributeArray("uv");
+
+    shader.setAttributeBuffer("ambient",GL_FLOAT,sizeof(float)*8,3,sizeof(Vertex));
+    shader.enableAttributeArray("ambient");
+
+    shader.setAttributeBuffer("diffuse",GL_FLOAT,sizeof(float)*11,3,sizeof(Vertex));
+    shader.enableAttributeArray("diffuse");
+
+    shader.setAttributeBuffer("specular",GL_FLOAT,sizeof(float)*14,3,sizeof(Vertex));
+    shader.enableAttributeArray("specular");
+
+    shader.setAttributeBuffer("shininess",GL_FLOAT,sizeof(float)*17,1,sizeof(Vertex));
+    shader.enableAttributeArray("shininess");
+
+    shader.setAttributeBuffer("mass",GL_FLOAT,sizeof(float)*18,1,sizeof(Vertex));
+    shader.enableAttributeArray("mass");
+
+    shader.setAttributeBuffer("velocity",GL_FLOAT,sizeof(float)*19,1,sizeof(Vertex));
+    shader.enableAttributeArray("velocity");
     modelview.setToIdentity();
+
     shader.setUniformValueArray("modelview",&modelview,1);
     connect(&updateTimer,SIGNAL(timeout()),this,SLOT(update()));
     updateTimer.setSingleShot(false);
@@ -73,7 +88,17 @@ void Canvas::resizeGL(int w, int h)
 void Canvas::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    glDrawArrays(GL_TRIANGLES,0,3);
+    modelview.setToIdentity();
+    modelview.translate(pos);
+
+    shader.bind();
+
+    shader.setUniformValueArray("modelview",&modelview,1);
+    vao.bind();
+    //glEnableVertexAttribArrayARB(0);
+    model.draw();
+    //glDrawArrays(GL_TRIANGLES,0,3);
+    //glDisableVertexAttribArrayARB(0);
 }
 
 void Canvas::keyPressEvent(QKeyEvent* event)
@@ -93,16 +118,12 @@ void Canvas::keyPressEvent(QKeyEvent* event)
             pos += QVector3D(1.0,0.0,0.0);
             break;
     }
-    modelview.setToIdentity();
-    modelview.translate(pos);
-    shader.setUniformValueArray("modelview",&modelview,1);
 }
 
 void Canvas::update()
 {
     updateGL();
 }
-
 
 bool Canvas::prepareShader(const QString& vertexShaderPath,const QString& fragmentShaderPath)
 {
@@ -121,6 +142,7 @@ bool Canvas::prepareShader(const QString& vertexShaderPath,const QString& fragme
     {
         qWarning()<<shader.log();
     }
+    qDebug()<<shader.log();
     return result;
 }
 
