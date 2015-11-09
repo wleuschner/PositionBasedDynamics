@@ -1,29 +1,29 @@
 #ifndef LIGHT_H
 #define LIGHT_H
-#include<glm/glm.hpp>
+#include<QVector3D>
 
 class Light
 {
 public:
     Light();
-    Light(glm::vec3& pos);
-    Light(glm::vec3& pos,glm::vec3& ambient,glm::vec3& diffuse,glm::vec3& specular);
+    Light(QVector3D& pos);
+    Light(QVector3D& pos,QVector3D& ambient,QVector3D& diffuse,QVector3D& specular);
 
-    void setPosition(glm::vec3& pos);
-    void setAmbient(glm::vec3& ambient);
-    void setDiffuse(glm::vec3& diffuse);
-    void setSpecular(glm::vec3& specular);
+    void setPosition(QVector3D& pos);
+    void setAmbient(QVector3D& ambient);
+    void setDiffuse(QVector3D& diffuse);
+    void setSpecular(QVector3D& specular);
 
-    glm::vec3 getPosition();
-    glm::vec3 getAmbient();
-    glm::vec3 getDiffuse();
-    glm::vec3 getSpecular();
+    const QVector3D& getPosition();
+    const QVector3D& getAmbient();
+    const QVector3D& getDiffuse();
+    const QVector3D& getSpecular();
 
 private:
-    glm::vec3 pos;
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
+    QVector3D pos;
+    QVector3D ambient;
+    QVector3D diffuse;
+    QVector3D specular;
 };
 
 #endif // LIGHT_H

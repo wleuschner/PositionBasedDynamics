@@ -2,64 +2,64 @@
 
 Light::Light()
 {
-    this->pos=glm::vec3(0.0,0.0,0.0);
-    this->ambient=glm::vec3(0.2,0.2,0.2);
-    this->diffuse=glm::vec3(0.5,0.5,0.5);
-    this->specular=glm::vec3(0.8,0.8,0.8);
+    this->pos=QVector3D(0.0,0.0,0.0);
+    this->ambient=QVector3D(0.2,0.2,0.2);
+    this->diffuse=QVector3D(0.5,0.5,0.5);
+    this->specular=QVector3D(0.8,0.8,0.8);
 }
 
-Light::Light(glm::vec3 &pos)
+Light::Light(QVector3D &pos)
 {
-    this->pos=glm::vec3(pos);
-    this->ambient=glm::vec3(0.2,0.2,0.2);
-    this->diffuse=glm::vec3(0.5,0.5,0.5);
-    this->specular=glm::vec3(0.8,0.8,0.8);
+    this->pos=QVector3D(pos);
+    this->ambient=QVector3D(0.2,0.2,0.2);
+    this->diffuse=QVector3D(0.5,0.5,0.5);
+    this->specular=QVector3D(0.8,0.8,0.8);
 }
 
-Light::Light(glm::vec3 &pos, glm::vec3 &ambient, glm::vec3 &diffuse, glm::vec3 &specular)
+Light::Light(QVector3D &pos, QVector3D &ambient, QVector3D &diffuse, QVector3D &specular)
 {
-    this->pos=glm::vec3(pos);
-    this->ambient=glm::vec3(ambient);
-    this->diffuse=glm::vec3(diffuse);
-    this->specular=glm::vec3(specular);
+    this->pos=QVector3D(pos);
+    this->ambient=QVector3D(ambient);
+    this->diffuse=QVector3D(diffuse);
+    this->specular=QVector3D(specular);
 }
 
-void Light::setPosition(glm::vec3& pos)
+void Light::setPosition(QVector3D& pos)
 {
-    this->pos=glm::vec3(pos);
+    this->pos=QVector3D(pos);
 }
 
-void Light::setAmbient(glm::vec3& ambient)
+void Light::setAmbient(QVector3D& ambient)
 {
-    this->ambient=glm::vec3(ambient);
+    this->ambient=QVector3D(ambient);
 }
 
-void Light::setDiffuse(glm::vec3& diffuse)
+void Light::setDiffuse(QVector3D& diffuse)
 {
-    this->diffuse=glm::vec3(diffuse);
+    this->diffuse=QVector3D(diffuse);
 }
 
-void Light::setSpecular(glm::vec3& specular)
+void Light::setSpecular(QVector3D& specular)
 {
-    this->specular=glm::vec3(specular);
+    this->specular=QVector3D(specular);
 }
 
-glm::vec3 Light::getPosition()
+const QVector3D& Light::getPosition()
 {
     return pos;
 }
 
-glm::vec3 Light::getAmbient()
+const QVector3D& Light::getAmbient()
 {
     return ambient;
 }
 
-glm::vec3 Light::getDiffuse()
+const QVector3D& Light::getDiffuse()
 {
     return diffuse;
 }
 
-glm::vec3 Light::getSpecular()
+const QVector3D& Light::getSpecular()
 {
     return specular;
 }

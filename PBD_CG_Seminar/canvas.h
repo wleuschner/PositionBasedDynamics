@@ -7,10 +7,11 @@
 #include <QGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include <QGLShaderProgram>
-#include <glm/glm.hpp>
 
+#include "camera.h"
 #include "light.h"
 #include "model.h"
+#include "solver.h"
 
 class Canvas : public QGLWidget
 {
@@ -31,6 +32,7 @@ public slots:
     void update();
 
 private:
+    void uploadLight(Light& light,int index);
 
     void solveSeidel();
     void solveJacobi();
@@ -39,7 +41,9 @@ private:
     QGLFunctions* extFunctions;
     QTimer updateTimer;
 
-    Model model;
+    Camera camera;
+    Light light;
+    Model* mesh;
     QOpenGLVertexArrayObject vao;
     QGLBuffer vertexBuffer;
     QGLShaderProgram shader;
@@ -47,8 +51,10 @@ private:
     QVector3D pos;
 
     QMatrix4x4 projection;
-    QMatrix4x4 modelview;
+    QMatrix4x4 view;
+    QMatrix4x4 model;
 
+    Solver solver;
 };
 
 #endif // CANVAS_H

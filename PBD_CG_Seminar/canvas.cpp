@@ -38,7 +38,15 @@ void Canvas::initializeGL()
 
     vao.create();
     vao.bind();
-    model.load("/home/wladimir/Model/Pool/Pool\ Table.3DS");
+    shader.bind();
+    mesh = new Model();
+    mesh->load("/home/wladimir/Model/Table/table.obj");
+    QMatrix4x4 model;
+    model.setToIdentity();
+    //model.scale(0.03125);
+    mesh->setMatrix(model);
+    //mesh = Model::createPlaneXY(16,16,16,16);
+    solver.addModel(mesh);
 
     shader.setAttributeBuffer("vertex",GL_FLOAT,0,3,sizeof(Vertex));
     shader.enableAttributeArray("vertex");
@@ -64,11 +72,18 @@ void Canvas::initializeGL()
     shader.setAttributeBuffer("mass",GL_FLOAT,sizeof(float)*18,1,sizeof(Vertex));
     shader.enableAttributeArray("mass");
 
-    shader.setAttributeBuffer("velocity",GL_FLOAT,sizeof(float)*19,1,sizeof(Vertex));
+    shader.setAttributeBuffer("velocity",GL_FLOAT,sizeof(float)*19,3,sizeof(Vertex));
     shader.enableAttributeArray("velocity");
-    modelview.setToIdentity();
 
-    shader.setUniformValueArray("modelview",&modelview,1);
+    QVector3D l_pos=QVector3D(20.0,0.0,10.0);
+    QVector3D l_amb=QVector3D(0.2,0.2,0.2);
+    QVector3D l_dif=QVector3D(0.4,0.4,0.4);
+    QVector3D l_spec = QVector3D(0.8,0.8,0.8);
+    light = Light(l_pos,l_amb,l_dif,l_spec);
+    resize(800,600);
+    uploadLight(light,0);
+
+
     connect(&updateTimer,SIGNAL(timeout()),this,SLOT(update()));
     updateTimer.setSingleShot(false);
     updateTimer.setInterval(15);
@@ -83,22 +98,24 @@ void Canvas::resizeGL(int w, int h)
     projection.setToIdentity();
     projection.perspective(45.0f,width/height,0.1f,100.0f);
     shader.setUniformValueArray("projection",&projection,1);
+
 }
 
 void Canvas::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    modelview.setToIdentity();
-    modelview.translate(pos);
+    view.setToIdentity();
+    view=camera.lookAt();
+    //modelview.translate(pos);
+    //modelview.rotate(180.0,0.0,1.0,0.0);
+
 
     shader.bind();
 
-    shader.setUniformValueArray("modelview",&modelview,1);
+    shader.setUniformValue("model",mesh->getMatrix());
+    shader.setUniformValueArray("view",&view,1);
     vao.bind();
-    //glEnableVertexAttribArrayARB(0);
-    model.draw();
-    //glDrawArrays(GL_TRIANGLES,0,3);
-    //glDisableVertexAttribArrayARB(0);
+    mesh->draw();
 }
 
 void Canvas::keyPressEvent(QKeyEvent* event)
@@ -106,22 +123,29 @@ void Canvas::keyPressEvent(QKeyEvent* event)
     switch(event->key())
     {
         case Qt::Key_W:
-            pos += QVector3D(0.0,0.0,-1.0);
+            camera.move(QVector3D(0.0,0.0,-1.0));
             break;
         case Qt::Key_S:
-            pos += QVector3D(0.0,0.0,1.0);
+            camera.move(QVector3D(0.0,0.0,1.0));
             break;
         case Qt::Key_A:
-            pos += QVector3D(-1.0,0.0,0.0);
+            camera.move(QVector3D(-1.0,0.0,0.0));
             break;
         case Qt::Key_D:
-            pos += QVector3D(1.0,0.0,0.0);
+            camera.move(QVector3D(1.0,0.0,0.0));
+            break;
+        case Qt::Key_PageUp:
+            camera.move(QVector3D(0.0,1.0,0.0));
+            break;
+        case Qt::Key_PageDown:
+            camera.move(QVector3D(0.0,-1.0,0.0));
             break;
     }
 }
 
 void Canvas::update()
 {
+    solver.solve();
     updateGL();
 }
 
@@ -146,3 +170,20 @@ bool Canvas::prepareShader(const QString& vertexShaderPath,const QString& fragme
     return result;
 }
 
+void Canvas::uploadLight(Light& light,int index)
+{
+    QVector3D pos = light.getPosition();
+    QVector3D ambient = light.getAmbient();
+    QVector3D diffuse = light.getDiffuse();
+    QVector3D specular = light.getSpecular();
+
+    std::string pos_string = QString("light[%0].pos").arg(index).toStdString();
+    std::string ambient_string = QString("light[%0].amb").arg(index).toStdString();
+    std::string diffuse_string = QString("light[%0].dif").arg(index).toStdString();
+    std::string specular_string = QString("light[%0].spec").arg(index).toStdString();
+
+    shader.setUniformValue(pos_string.c_str(),pos);
+    shader.setUniformValue(ambient_string.c_str(),ambient);
+    shader.setUniformValue(diffuse_string.c_str(),diffuse);
+    shader.setUniformValue(specular_string.c_str(),specular);
+}

@@ -29,8 +29,8 @@ public:
     float getMass() const;
     void setMass(float value);
 
-    float getVelocity() const;
-    void setVelocity(const float value);
+    QVector3D getVelocity() const;
+    void setVelocity(const QVector3D &value);
 
     QVector2D getUv() const;
     void setUv(const QVector2D &value);
@@ -49,7 +49,7 @@ private:
 
     //PBD Attributes
     float mass;
-    float velocity;
+    QVector3D velocity;
 };
 
 #endif // VERTEX_H

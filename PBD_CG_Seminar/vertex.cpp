@@ -66,12 +66,13 @@ void Vertex::setMass(float value)
 {
     mass = value;
 }
-float Vertex::getVelocity() const
+
+QVector3D Vertex::getVelocity() const
 {
     return velocity;
 }
 
-void Vertex::setVelocity(const float value)
+void Vertex::setVelocity(const QVector3D& value)
 {
     velocity = value;
 }

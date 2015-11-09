@@ -8,6 +8,9 @@ class Camera
 public:
     Camera();
     QMatrix4x4 lookAt();
+
+    void move(const QVector3D& a);
+    void reset();
 private:
     QVector3D pos;
     QVector3D at;

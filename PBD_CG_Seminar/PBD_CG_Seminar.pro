@@ -19,7 +19,9 @@ SOURCES += main.cpp\
     vertex.cpp \
     camera.cpp \
     constraintparameters.cpp \
-    model.cpp
+    model.cpp \
+    mesh.cpp \
+    solver.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -27,7 +29,9 @@ HEADERS  += mainwindow.h \
     vertex.h \
     camera.h \
     constraintparameters.h \
-    model.h
+    model.h \
+    mesh.h \
+    solver.h
 
 FORMS    += mainwindow.ui
 
