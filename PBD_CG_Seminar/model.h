@@ -9,6 +9,7 @@
 #include<QMatrix>
 #include<QVector>
 #include"vertex.h"
+#include"face.h"
 
 class Model
 {
@@ -40,6 +41,7 @@ private:
 
     std::string name;
     QVector<unsigned int> indices;
+    QVector<Face> faces;
 
     QVector<QVector3D> position;
     QVector<QVector3D> normal;

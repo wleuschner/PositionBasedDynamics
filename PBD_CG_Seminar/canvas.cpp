@@ -13,6 +13,7 @@ Canvas::Canvas(QWidget *parent) :
     format.setProfile(QGLFormat::CoreProfile);
     format.setSampleBuffers(true);
     setFormat(format);
+    camera.move(QVector3D(0.0,0.0,100.0));
 }
 
 void Canvas::initializeGL()
@@ -40,14 +41,14 @@ void Canvas::initializeGL()
     vao.bind();
     shader.bind();
     mesh = new Model();
-    mesh->load("/home/wladimir/Model/triangle.obj");
+    //mesh->load("/home/wladimir/Model/triangle.obj");
     QMatrix4x4 model;
-    model.setToIdentity();
+    model.translate(0,0,-0.0);
     //model.scale(0.03125);
     //model.scale(0.5);
     mesh->setMatrix(model);
-    //mesh = Model::createPlaneXZ(32,32,32,32);
-    //solver.addModel(mesh);
+    mesh = Model::createPlaneXY(16,16,16,16);
+    solver.addModel(mesh);
 
     shader.setAttributeBuffer("vertex",GL_FLOAT,0,3,sizeof(Vertex));
     shader.enableAttributeArray("vertex");

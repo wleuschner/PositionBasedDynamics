@@ -230,7 +230,59 @@ Model* Model::createPlaneXY(float width,float height,int xPatches,int yPatches)
     float patchYStep = height/yPatches;
 
     Model *model = new Model();
+    for(int y=0;y<yPatches;y++)
+    {
+        for(int x=0;x<xPatches;x++)
+        {
+            model->position.push_back(QVector3D(x*patchXStep-centerX,y*patchYStep-centerY,0.0));
+            model->normal.push_back(QVector3D(0.0,0.0,1.0));
+            model->uv_coords.push_back(QVector2D(x/((float)width),y/((float)height)));
+        }
+    }
+    for(int i=0;i<model->position.length();i++)
+    {
+        Vertex v;
+        v.setPos(model->position[i]);
+        v.setNormal(model->normal[i]);
+        v.setUv(model->uv_coords[i]);
 
+        v.setAmbient(QVector3D(0.2,0.2,0.2));
+        v.setDiffuse(QVector3D(0.4,0.4,0.4));
+        v.setSpecular(QVector3D(0.8,0.8,0.8));
+        v.setShininess(1.0);
+        v.setMass(1.0f);
+        v.setVelocity(QVector3D(0,0,0));
+        model->vertices.push_back(v);
+    }
+    for(int y=0;y<yPatches-1;y++)
+    {
+        for(int x=0;x<xPatches-1;x++)
+        {
+            Face f1,f2;
+            //Face 1
+            model->indices.push_back(y*xPatches+x);
+            f1.v1=y*xPatches+x;
+            model->indices.push_back((y+1)*xPatches+x);
+            f1.v2=(y+1)*xPatches+x;
+            model->indices.push_back(y*xPatches+(x+1));
+            f1.v3=y*xPatches+(x+1);
+            model->faces.push_back(f1);
+
+            //Face 2
+            model->indices.push_back((y+1)*xPatches+x);
+            f2.v1=(y+1)*xPatches+x;
+            model->indices.push_back((y+1)*xPatches+(x+1));
+            f2.v2=(y+1)*xPatches+(x+1);
+            model->indices.push_back(y*xPatches+(x+1));
+            f2.v3=y*xPatches+(x+1);
+            model->faces.push_back(f2);
+        }
+    }
+    model->createVBO();
+    model->createIndex();
+    model->mat.setToIdentity();
+    return model;
+/*
     for(int y=0;y<yPatches-1;y++)
     {
         for(int x=0;x<xPatches-1;x++)
@@ -271,7 +323,7 @@ Model* Model::createPlaneXY(float width,float height,int xPatches,int yPatches)
         v.setMass(1.0f);
         v.setVelocity(QVector3D(0,0,0));
         model->vertices.push_back(v);
-    }
+    }*/
     model->createVBO();
     model->mat.setToIdentity();
     return model;

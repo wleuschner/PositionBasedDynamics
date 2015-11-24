@@ -3,6 +3,12 @@
 Vertex::Vertex()
 {
 }
+
+QVector3D* Vertex::getPosReference()
+{
+    return &pos;
+}
+
 QVector3D Vertex::getPos() const
 {
     return pos;

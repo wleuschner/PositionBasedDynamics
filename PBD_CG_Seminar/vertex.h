@@ -8,6 +8,7 @@ class Vertex
 public:
     Vertex();
 
+    QVector3D* getPosReference();
     QVector3D getPos() const;
     void setPos(const QVector3D &value);
 

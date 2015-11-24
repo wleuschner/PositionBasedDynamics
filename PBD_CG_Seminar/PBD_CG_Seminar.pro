@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     constraintparameters.cpp \
     model.cpp \
     mesh.cpp \
-    solver.cpp
+    solver.cpp \
+    face.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -31,7 +32,8 @@ HEADERS  += mainwindow.h \
     constraintparameters.h \
     model.h \
     mesh.h \
-    solver.h
+    solver.h \
+    face.h
 
 FORMS    += mainwindow.ui
 
