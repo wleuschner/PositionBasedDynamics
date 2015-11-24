@@ -1,4 +1,4 @@
-#version 400
+#version 140
 //Lighting struct
 struct LightSource
 {

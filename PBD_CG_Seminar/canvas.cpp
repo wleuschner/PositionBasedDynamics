@@ -9,7 +9,7 @@ Canvas::Canvas(QWidget *parent) :
     QGLWidget(parent), vertexBuffer(QGLBuffer::VertexBuffer)
 {
     QGLFormat format;
-    format.setVersion(4,0);
+    format.setVersion(3,4);
     format.setProfile(QGLFormat::CoreProfile);
     format.setSampleBuffers(true);
     setFormat(format);
@@ -47,7 +47,8 @@ void Canvas::initializeGL()
     //model.scale(0.03125);
     //model.scale(0.5);
     mesh->setMatrix(model);
-    mesh = Model::createPlaneXY(16,16,16,16);
+    //mesh = Model::createPlaneXY(16,16,16,16);
+    mesh = Model::createSphere(4,32,32);
     solver.addModel(mesh);
 
     shader.setAttributeBuffer("vertex",GL_FLOAT,0,3,sizeof(Vertex));

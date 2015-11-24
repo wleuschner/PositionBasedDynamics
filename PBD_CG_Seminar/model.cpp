@@ -6,6 +6,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/mesh.h>
 #include <assimp/scene.h>
+#define PI2 6.28318530718
 
 Model::Model()
 {
@@ -282,51 +283,6 @@ Model* Model::createPlaneXY(float width,float height,int xPatches,int yPatches)
     model->createIndex();
     model->mat.setToIdentity();
     return model;
-/*
-    for(int y=0;y<yPatches-1;y++)
-    {
-        for(int x=0;x<xPatches-1;x++)
-        {
-            //Error in UV COORDS cast float
-            model->position.push_back(QVector3D(patchXStep*x-centerX,patchYStep*y-centerY,0));
-            model->normal.push_back(QVector3D(0,0,1));
-            model->uv_coords.push_back(QVector2D(x/xPatches,y/yPatches));
-            model->position.push_back(QVector3D(patchXStep*(x+1)-centerX,patchYStep*y-centerY,0));
-            model->normal.push_back(QVector3D(0,0,1));
-            model->uv_coords.push_back(QVector2D(x/xPatches,y/yPatches));
-            model->position.push_back(QVector3D(patchXStep*(x+1)-centerX,patchYStep*(y+1)-centerY,0));
-            model->normal.push_back(QVector3D(0,0,1));
-            model->uv_coords.push_back(QVector2D(x/xPatches,y/yPatches));
-
-            model->position.push_back(QVector3D(patchXStep*(x+1)-centerX,patchYStep*(y+1)-centerY,0));
-            model->normal.push_back(QVector3D(0,0,1));
-            model->uv_coords.push_back(QVector2D(x/xPatches,y/yPatches));
-            model->position.push_back(QVector3D(patchXStep*x-centerX,patchYStep*(y+1)-centerY,0));
-            model->normal.push_back(QVector3D(0,0,1));
-            model->uv_coords.push_back(QVector2D(x/xPatches,y/yPatches));
-            model->position.push_back(QVector3D(patchXStep*x-centerX,patchYStep*y-centerY,0));
-            model->normal.push_back(QVector3D(0,0,1));
-            model->uv_coords.push_back(QVector2D(x/xPatches,y/yPatches));
-        }
-    }
-    for(int i=0;i<model->position.length();i++)
-    {
-        Vertex v;
-        v.setPos(model->position[i]);
-        v.setNormal(model->normal[i]);
-        v.setUv(model->uv_coords[i]);
-
-        v.setAmbient(QVector3D(0.2,0.2,0.2));
-        v.setDiffuse(QVector3D(0.4,0.4,0.4));
-        v.setSpecular(QVector3D(0.8,0.8,0.8));
-        v.setShininess(1.0);
-        v.setMass(1.0f);
-        v.setVelocity(QVector3D(0,0,0));
-        model->vertices.push_back(v);
-    }*/
-    model->createVBO();
-    model->mat.setToIdentity();
-    return model;
 }
 
 Model* Model::createPlaneYZ(float width,float height,int yPatches,int zPatches)
@@ -387,10 +343,124 @@ Model* Model::createPlaneYZ(float width,float height,int yPatches,int zPatches)
 
 Model* Model::createCylinder(float radius,int stacks,int slices)
 {
+    Model *model = new Model();
+    float angle_inc = PI2/slices;
+    for(int y=0;y<stacks;y++)
+    {
+        float angle = 0.0;
+        for(int x=0;x<slices;x++,angle+=angle_inc)
+        {
+            model->position.push_back(QVector3D(radius*cosf(angle),y,radius*sinf(angle)));
+            model->normal.push_back(QVector3D(0.0,0.0,1.0));
+            model->uv_coords.push_back(QVector2D(x/((float)slices),y/((float)stacks)));
+        }
+    }
+    for(int i=0;i<model->position.length();i++)
+    {
+        Vertex v;
+        v.setPos(model->position[i]);
+        v.setNormal(model->normal[i]);
+        v.setUv(model->uv_coords[i]);
+
+        v.setAmbient(QVector3D(0.2,0.2,0.2));
+        v.setDiffuse(QVector3D(0.4,0.4,0.4));
+        v.setSpecular(QVector3D(0.8,0.8,0.8));
+        v.setShininess(1.0);
+        v.setMass(1.0f);
+        v.setVelocity(QVector3D(0,0,0));
+        model->vertices.push_back(v);
+    }
+    for(int y=0;y<stacks-1;y++)
+    {
+        for(int x=0;x<slices-1;x++)
+        {
+            Face f1,f2;
+            //Face 1
+            model->indices.push_back(y*slices+x);
+            f1.v1=y*slices+x;
+            model->indices.push_back((y+1)*slices+x);
+            f1.v2=(y+1)*slices+x;
+            model->indices.push_back(y*slices+(x+1));
+            f1.v3=y*slices+(x+1);
+            model->faces.push_back(f1);
+
+            //Face 2
+            model->indices.push_back((y+1)*slices+x);
+            f2.v1=(y+1)*slices+x;
+            model->indices.push_back((y+1)*slices+(x+1));
+            f2.v2=(y+1)*slices+(x+1);
+            model->indices.push_back(y*slices+(x+1));
+            f2.v3=y*slices+(x+1);
+            model->faces.push_back(f2);
+        }
+    }
+    model->createVBO();
+    model->createIndex();
+    model->mat.setToIdentity();
+    return model;
 }
 
 Model* Model::createSphere(float radius,int stacks,int slices)
 {
+    Model *model = new Model();
+    float angle1_inc = PI2/stacks;
+    float angle2_inc = PI2/slices;
+    float angle1 = 0.0;
+    for(int y=0;y<stacks;y++,angle1+=angle1_inc)
+    {
+        float angle2 = 0.0;
+        float a1_sinf = sinf(angle1);
+        float a1_cosf = cosf(angle1);
+        for(int x=0;x<slices;x++,angle2+=angle2_inc)
+        {
+            model->position.push_back(QVector3D(radius*a1_cosf*sinf(angle2),radius*cosf(angle2),radius*a1_sinf*sinf(angle2)));
+            model->normal.push_back(QVector3D(a1_cosf*sinf(angle2),cosf(angle2),a1_sinf*sinf(angle2)));
+            model->uv_coords.push_back(QVector2D(x/((float)slices),y/((float)stacks)));
+        }
+    }
+    for(int i=0;i<model->position.length();i++)
+    {
+        Vertex v;
+        v.setPos(model->position[i]);
+        v.setNormal(model->normal[i]);
+        v.setUv(model->uv_coords[i]);
+
+        v.setAmbient(QVector3D(0.2,0.2,0.2));
+        v.setDiffuse(QVector3D(0.4,0.4,0.4));
+        v.setSpecular(QVector3D(0.8,0.8,0.8));
+        v.setShininess(1.0);
+        v.setMass(1.0f);
+        v.setVelocity(QVector3D(0,0,0));
+        model->vertices.push_back(v);
+    }
+    for(int y=0;y<stacks-1;y++)
+    {
+        for(int x=0;x<slices-1;x++)
+        {
+            Face f1,f2;
+            //Face 1
+            model->indices.push_back(y*slices+x);
+            f1.v1=y*slices+x;
+            model->indices.push_back((y+1)*slices+x);
+            f1.v2=(y+1)*slices+x;
+            model->indices.push_back(y*slices+(x+1));
+            f1.v3=y*slices+(x+1);
+            model->faces.push_back(f1);
+
+            //Face 2
+            model->indices.push_back((y+1)*slices+x);
+            f2.v1=(y+1)*slices+x;
+            model->indices.push_back((y+1)*slices+(x+1));
+            f2.v2=(y+1)*slices+(x+1);
+            model->indices.push_back(y*slices+(x+1));
+            f2.v3=y*slices+(x+1);
+            model->faces.push_back(f2);
+        }
+    }
+    model->createVBO();
+    model->createIndex();
+    model->mat.setToIdentity();
+    return model;
 }
 
 Model* Model::createTorus(float inner,float outer,int stacks,int slices)

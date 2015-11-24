@@ -1,4 +1,4 @@
-#version 400
+#version 140
 
 in vec4 frag_pos;
 in vec4 frag_color;
