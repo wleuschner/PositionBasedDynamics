@@ -10,10 +10,12 @@ Solver::Solver()
 void Solver::solve()
 {
     double t = 1.0/60.0;
-    for(QList<Model*>::iterator m=modelList.begin();m!=modelList.end();m++)
+    for(QList<Entity>::iterator e=modelList.begin();e!=modelList.end();e++)
     {
-        QVector<unsigned int> indices = (*m)->getIndices();
-        QVector<Vertex>& vertices = (*m)->getVertices();
+        Model* m = e->getModel();
+        QMatrix4x4 mat = e->getMatrix();
+        QVector<unsigned int> indices = m->getIndices();
+        QVector<Vertex>& vertices = m->getVertices();
         QVector<Vertex> positions = vertices;
         for(QVector<Vertex>::iterator i=positions.begin();i!=positions.end();i++)
         {
@@ -77,7 +79,7 @@ void Solver::solve()
             vertices[i].setPos(p);
         }
         constraints.clear();
-        (*m)->update();
+        m->update();
     }
 }
 
@@ -117,7 +119,7 @@ void Solver::solveEnviromentConstraint(const QVector3D& p1,const QVector3D& n,fl
     }
 }
 
-void Solver::addModel(Model* model)
+void Solver::addModel(Entity model)
 {
     modelList.append(model);
 }

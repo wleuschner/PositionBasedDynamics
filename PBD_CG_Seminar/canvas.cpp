@@ -40,15 +40,12 @@ void Canvas::initializeGL()
     vao.create();
     vao.bind();
     shader.bind();
-    mesh = new Model();
+    mesh = Entity(Model::createCylinder(2,32,32));
     //mesh->load("/home/wladimir/Model/triangle.obj");
     QMatrix4x4 model;
-    model.translate(0,0,-0.0);
-    //model.scale(0.03125);
-    //model.scale(0.5);
-    mesh->setMatrix(model);
+    model.translate(0,0,0);
+    mesh.setMatrix(model);
     //mesh = Model::createPlaneXY(16,16,16,16);
-    mesh = Model::createSphere(4,32,32);
     solver.addModel(mesh);
 
     shader.setAttributeBuffer("vertex",GL_FLOAT,0,3,sizeof(Vertex));
@@ -115,10 +112,10 @@ void Canvas::paintGL()
 
     shader.bind();
 
-    shader.setUniformValue("model",mesh->getMatrix());
+    shader.setUniformValue("model",mesh.getMatrix());
     shader.setUniformValueArray("view",&view,1);
     vao.bind();
-    mesh->draw();
+    mesh.draw();
 }
 
 void Canvas::keyPressEvent(QKeyEvent* event)

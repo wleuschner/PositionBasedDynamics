@@ -17,8 +17,6 @@ public:
     Model();
     bool load(std::string path);
     bool setShader(const QString& vert,const QString& frag);
-    void setMatrix(const QMatrix4x4& mat);
-    const QMatrix4x4& getMatrix();
     bool release();
     void bind();
     void draw();
@@ -48,8 +46,6 @@ private:
     QVector<QVector2D> uv_coords;
 
     QVector<Vertex> vertices;
-
-    QMatrix4x4 mat;
 
     QOpenGLShaderProgram shader;
     QOpenGLBuffer vbo;

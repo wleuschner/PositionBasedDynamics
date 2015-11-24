@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     model.cpp \
     mesh.cpp \
     solver.cpp \
-    face.cpp
+    face.cpp \
+    entity.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -33,7 +34,8 @@ HEADERS  += mainwindow.h \
     model.h \
     mesh.h \
     solver.h \
-    face.h
+    face.h \
+    entity.h
 
 FORMS    += mainwindow.ui
 

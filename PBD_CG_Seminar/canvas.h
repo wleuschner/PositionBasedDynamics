@@ -10,7 +10,7 @@
 
 #include "camera.h"
 #include "light.h"
-#include "model.h"
+#include "entity.h"
 #include "solver.h"
 
 class Canvas : public QGLWidget
@@ -43,7 +43,7 @@ private:
 
     Camera camera;
     Light light;
-    Model* mesh;
+    Entity mesh;
     QOpenGLVertexArrayObject vao;
     QGLBuffer vertexBuffer;
     QGLShaderProgram shader;

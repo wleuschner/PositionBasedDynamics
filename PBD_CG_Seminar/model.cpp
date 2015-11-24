@@ -66,20 +66,8 @@ bool Model::load(std::string path)
     }
     createVBO();
     createIndex();
-    mat.setToIdentity();
     return true;
 }
-
-void Model::setMatrix(const QMatrix4x4& mat)
-{
-    this->mat=mat;
-}
-
-const QMatrix4x4& Model::getMatrix()
-{
-    return mat;
-}
-
 
 bool Model::setShader(const QString& vert,const QString& frag)
 {
@@ -218,7 +206,6 @@ Model* Model::createPlaneXZ(float width,float height,int xPatches,int zPatches)
         model->vertices.push_back(v);
     }
     model->createVBO();
-    model->mat.setToIdentity();
     return model;
 }
 
@@ -281,7 +268,6 @@ Model* Model::createPlaneXY(float width,float height,int xPatches,int yPatches)
     }
     model->createVBO();
     model->createIndex();
-    model->mat.setToIdentity();
     return model;
 }
 
@@ -337,7 +323,6 @@ Model* Model::createPlaneYZ(float width,float height,int yPatches,int zPatches)
         model->vertices.push_back(v);
     }
     model->createVBO();
-    model->mat.setToIdentity();
     return model;
 }
 
@@ -396,7 +381,6 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
     }
     model->createVBO();
     model->createIndex();
-    model->mat.setToIdentity();
     return model;
 }
 
@@ -459,7 +443,6 @@ Model* Model::createSphere(float radius,int stacks,int slices)
     }
     model->createVBO();
     model->createIndex();
-    model->mat.setToIdentity();
     return model;
 }
 
