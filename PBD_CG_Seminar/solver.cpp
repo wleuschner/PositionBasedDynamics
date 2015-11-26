@@ -15,8 +15,11 @@ void Solver::solve()
         Model* m = e->getModel();
         QMatrix4x4 mat = e->getMatrix();
         QVector<unsigned int> indices = m->getIndices();
+        QVector<Face> faces = m->getFaces();
         QVector<Vertex>& vertices = m->getVertices();
         QVector<Vertex> positions = vertices;
+
+        //External forces
         for(QVector<Vertex>::iterator i=positions.begin();i!=positions.end();i++)
         {
             double g = 9.81;
@@ -26,6 +29,7 @@ void Solver::solve()
             i->setVelocity(v);
         }
 
+        //Calculate estimates
         for(QVector<Vertex>::iterator i=positions.begin();i!=positions.end();i++)
         {
             QVector3D x = i->getPos();
@@ -48,6 +52,7 @@ void Solver::solve()
         //Solver Loops
         for(int i=0;i<solverLoops;i++)
         {
+            //Solve General Constraints
             for(QVector<unsigned int>::iterator j=indices.begin();std::distance(j,indices.end())>1;j++)
             {
                 QVector3D p1 = positions[*j].getPos();
@@ -63,6 +68,7 @@ void Solver::solve()
                 positions[*j].setPos(p1);
                 positions[*(j+1)].setPos(p2);
             }
+            //Solve Collision Constraints
             for(QVector<ConstraintParameters>::iterator i=constraints.begin();i!=constraints.end();i++)
             {
                 QVector3D dp1(0,0,0);
@@ -71,12 +77,24 @@ void Solver::solve()
                 *(i->point)+=dp1;
             }
         }
+        //Set new Positions
         for(int i=0;i<positions.length();i++)
         {
             QVector3D x = vertices[i].getPos();
             QVector3D p = positions[i].getPos();
             vertices[i].setVelocity(((p-x)/t)*0.95);
             vertices[i].setPos(p);
+        }
+        //Recalculate normals
+        for(QVector<Face>::iterator i = faces.begin();i!=faces.end();i++)
+        {
+            QVector3D v1 = positions[i->v1].getPos();
+            QVector3D v2 = positions[i->v2].getPos();
+            QVector3D v3 = positions[i->v3].getPos();
+            QVector3D normal = QVector3D::crossProduct(v1-v2,v1-v3).normalized();
+            vertices[i->v1].setNormal(normal);
+            vertices[i->v2].setNormal(normal);
+            vertices[i->v3].setNormal(normal);
         }
         constraints.clear();
         m->update();

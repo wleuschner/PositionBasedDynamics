@@ -41,6 +41,7 @@ void Canvas::initializeGL()
     vao.bind();
     shader.bind();
     mesh = Entity(Model::createCylinder(2,32,32));
+    //mesh = Entity(Model::createPlaneXY(16,16,32,32));
     //mesh->load("/home/wladimir/Model/triangle.obj");
     QMatrix4x4 model;
     model.translate(0,0,0);

@@ -118,6 +118,12 @@ QVector<unsigned int>& Model::getIndices()
     return indices;
 }
 
+QVector<Face>& Model::getFaces()
+{
+    return faces;
+}
+
+
 bool Model::createVBO()
 {
     if(!vbo.create())
@@ -388,7 +394,7 @@ Model* Model::createSphere(float radius,int stacks,int slices)
 {
     Model *model = new Model();
     float angle1_inc = PI2/stacks;
-    float angle2_inc = PI2/slices;
+    float angle2_inc = PI2/(slices*2);
     float angle1 = 0.0;
     for(int y=0;y<stacks;y++,angle1+=angle1_inc)
     {

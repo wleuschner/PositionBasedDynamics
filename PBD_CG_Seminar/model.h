@@ -23,6 +23,7 @@ public:
 
     QVector<Vertex>& getVertices();
     QVector<unsigned int>& getIndices();
+    QVector<Face>& getFaces();
 
     //Primitives
     static Model* createPlaneXZ(float width,float height,int xPatches,int zPatches);
