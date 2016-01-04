@@ -1,4 +1,5 @@
 #include "entity.h"
+#include <QMatrix3x3>
 
 Entity::Entity()
 {
@@ -33,7 +34,10 @@ Model* Entity::getModel()
     return model;
 }
 
-void Entity::draw()
+void Entity::draw(QOpenGLShaderProgram& shader)
 {
-    model->draw();
+    QMatrix3x3 normalMatrix = mat.normalMatrix();
+    shader.setUniformValue("model",mat);
+    shader.setUniformValue("normalMatrix",normalMatrix);
+    model->draw(shader);
 }

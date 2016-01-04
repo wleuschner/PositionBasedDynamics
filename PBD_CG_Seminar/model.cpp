@@ -10,6 +10,15 @@
 
 Model::Model()
 {
+    shash = NULL;
+}
+
+Model::~Model()
+{
+    if(shash!=NULL)
+    {
+        delete shash;
+    }
 }
 
 bool Model::load(std::string path)
@@ -67,26 +76,6 @@ bool Model::load(std::string path)
     createVBO();
     createIndex();
     return true;
-}
-
-bool Model::setShader(const QString& vert,const QString& frag)
-{
-    bool result = shader.addShaderFromSourceFile(QOpenGLShader::Vertex,vert);
-    if(!result)
-    {
-        qWarning()<<shader.log();
-    }
-    result = shader.addShaderFromSourceFile(QOpenGLShader::Fragment,frag);
-    if(!result)
-    {
-        qWarning()<<shader.log();
-    }
-    result = shader.link();
-    if(!result)
-    {
-        qWarning()<<shader.log();
-    }
-    return result;
 }
 
 bool Model::release()
@@ -155,8 +144,36 @@ bool Model::createIndex()
     return true;
 }
 
-void Model::draw()
+void Model::draw(QOpenGLShaderProgram& shader)
 {
+    bind();
+    shader.setAttributeBuffer("vertex",GL_FLOAT,0,3,sizeof(Vertex));
+    shader.enableAttributeArray("vertex");
+
+    shader.setAttributeBuffer("normal",GL_FLOAT,sizeof(float)*3,3,sizeof(Vertex));
+    shader.enableAttributeArray("normal");
+
+    shader.setAttributeBuffer("uv",GL_FLOAT,sizeof(float)*6,2,sizeof(Vertex));
+    shader.enableAttributeArray("uv");
+
+    shader.setAttributeBuffer("ambient",GL_FLOAT,sizeof(float)*8,3,sizeof(Vertex));
+    shader.enableAttributeArray("ambient");
+
+    shader.setAttributeBuffer("diffuse",GL_FLOAT,sizeof(float)*11,3,sizeof(Vertex));
+    shader.enableAttributeArray("diffuse");
+
+    shader.setAttributeBuffer("specular",GL_FLOAT,sizeof(float)*14,3,sizeof(Vertex));
+    shader.enableAttributeArray("specular");
+
+    shader.setAttributeBuffer("shininess",GL_FLOAT,sizeof(float)*17,1,sizeof(Vertex));
+    shader.enableAttributeArray("shininess");
+
+    shader.setAttributeBuffer("mass",GL_FLOAT,sizeof(float)*18,1,sizeof(Vertex));
+    shader.enableAttributeArray("mass");
+
+    shader.setAttributeBuffer("velocity",GL_FLOAT,sizeof(float)*19,3,sizeof(Vertex));
+    shader.enableAttributeArray("velocity");
+
     glDrawElements(GL_TRIANGLES,indices.length(),GL_UNSIGNED_INT,(void*)0);
 }
 
@@ -336,16 +353,20 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
 {
     Model *model = new Model();
     float angle_inc = PI2/slices;
-    for(int y=0;y<stacks;y++)
+    float r = radius;
+    for(int y=-stacks/2;y<stacks/2;y++)
     {
         float angle = 0.0;
         for(int x=0;x<slices;x++,angle+=angle_inc)
         {
+            fmax(r,y);
             model->position.push_back(QVector3D(radius*cosf(angle),y,radius*sinf(angle)));
             model->normal.push_back(QVector3D(0.0,0.0,1.0));
             model->uv_coords.push_back(QVector2D(x/((float)slices),y/((float)stacks)));
         }
     }
+
+    model->shash = new SpatialHash(2.0);
     for(int i=0;i<model->position.length();i++)
     {
         Vertex v;
@@ -360,6 +381,7 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
         v.setMass(1.0f);
         v.setVelocity(QVector3D(0,0,0));
         model->vertices.push_back(v);
+
     }
     for(int y=0;y<stacks-1;y++)
     {
@@ -375,6 +397,12 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
             f1.v3=y*slices+(x+1);
             model->faces.push_back(f1);
 
+            //Insert into Spatial Hash
+            Vertex* p1 = &model->vertices[f1.v1];
+            Vertex* p2 = &model->vertices[f1.v2];
+            Vertex* p3 = &model->vertices[f1.v3];
+            model->shash->insert(p1,p2,p3);
+
             //Face 2
             model->indices.push_back((y+1)*slices+x);
             f2.v1=(y+1)*slices+x;
@@ -383,6 +411,12 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
             model->indices.push_back(y*slices+(x+1));
             f2.v3=y*slices+(x+1);
             model->faces.push_back(f2);
+
+            //Insert into Spatial Hash
+            p1 = &model->vertices[f2.v1];
+            p2 = &model->vertices[f2.v2];
+            p3 = &model->vertices[f2.v3];
+            model->shash->insert(p1,p2,p3);
         }
     }
     model->createVBO();

@@ -10,16 +10,17 @@
 #include<QVector>
 #include"vertex.h"
 #include"face.h"
+#include"spatialhash.h"
 
 class Model
 {
 public:
     Model();
+    ~Model();
     bool load(std::string path);
-    bool setShader(const QString& vert,const QString& frag);
     bool release();
     void bind();
-    void draw();
+    void draw(QOpenGLShaderProgram& shader);
 
     QVector<Vertex>& getVertices();
     QVector<unsigned int>& getIndices();
@@ -48,9 +49,10 @@ private:
 
     QVector<Vertex> vertices;
 
-    QOpenGLShaderProgram shader;
     QOpenGLBuffer vbo;
     QOpenGLBuffer index;
+
+    SpatialHash* shash;
 };
 
 #endif // MODEL_H

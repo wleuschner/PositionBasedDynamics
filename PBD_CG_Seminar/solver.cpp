@@ -10,7 +10,52 @@ Solver::Solver()
 void Solver::solve()
 {
     double t = 1.0/60.0;
-    for(QList<Entity>::iterator e=modelList.begin();e!=modelList.end();e++)
+
+    //Rigid Body Physics
+    for(QList<Entity>::iterator e=rigidList.begin();e!=rigidList.end();e++)
+    {
+        Model* m = e->getModel();
+        QMatrix4x4 mat = e->getMatrix();
+        QVector<unsigned int> indices = m->getIndices();
+        QVector<Face> faces = m->getFaces();
+        QVector<Vertex>& vertices = m->getVertices();
+        QVector<Vertex> positions = vertices;
+
+        //External forces
+        for(QVector<Vertex>::iterator i=positions.begin();i!=positions.end();i++)
+        {
+            double g = 9.81;
+            double w = 1.0/i->getMass();
+            QVector3D v = i->getVelocity();
+            v = v+t*w*QVector3D(0.0,-g,0.0);
+            i->setVelocity(v);
+        }
+
+        //Calculate estimates
+        for(QVector<Vertex>::iterator i=positions.begin();i!=positions.end();i++)
+        {
+            QVector3D x = i->getPos();
+            QVector3D v = i->getVelocity();
+            QVector3D p = x+t*v;
+            i->setPos(p);
+        }
+
+        for(QVector<Vertex>::iterator i=positions.begin();i!=positions.end();i++)
+        {
+            QVector3D* pos = i->getPosReference();
+            //TODO Collision with other Objects
+
+            //Collision with floor
+            float dist = QVector3D::dotProduct(*pos,QVector3D(0.0,1.0,0.0))-40;
+            if(dist<0.0)
+            {
+                constraints.push_back(ConstraintParameters(pos,QVector3D(0.0,1.0,0.0),-40.0));
+            }
+        }
+    }
+
+    //Soft Body Physics
+    for(QList<Entity>::iterator e=softList.begin();e!=softList.end();e++)
     {
         Model* m = e->getModel();
         QMatrix4x4 mat = e->getMatrix();
@@ -42,10 +87,15 @@ void Solver::solve()
         for(QVector<Vertex>::iterator i=positions.begin();i!=positions.end();i++)
         {
             QVector3D* pos = i->getPosReference();
-            float dist = QVector3D::dotProduct(*pos,QVector3D(0.0,1.0,0.0))-10.0;
+            //TODO Collision with other Objects
+
+            //TODO Selfcolision
+
+            //Collision with floor
+            float dist = QVector3D::dotProduct(*pos,QVector3D(0.0,1.0,0.0))-40;
             if(dist<0.0)
             {
-                constraints.push_back(ConstraintParameters(pos,QVector3D(0.0,1.0,0.0),-10.0));
+                constraints.push_back(ConstraintParameters(pos,QVector3D(0.0,1.0,0.0),-40.0));
             }
         }
         //Project Contraints
@@ -124,9 +174,11 @@ void Solver::solveDistanceConstraint(const QVector3D& p1,const QVector3D& p2,flo
 
 void Solver::solveBendConstraint(const QVector3D& p1,const QVector3D& p2,float phi,QVector3D& dp1,QVector3D& dp2)
 {
-
 }
 
+void Solver::solveTetrahedralConstraint(const QVector3D& p1,const QVector3D& p2,const QVector3D& p3,const QVector3D& p4,float v0)
+{
+}
 
 void Solver::solveEnviromentConstraint(const QVector3D& p1,const QVector3D& n,float d,QVector3D& dp1)
 {
@@ -139,10 +191,10 @@ void Solver::solveEnviromentConstraint(const QVector3D& p1,const QVector3D& n,fl
 
 void Solver::addModel(Entity model)
 {
-    modelList.append(model);
+    softList.append(model);
 }
 
 void Solver::reset()
 {
-    modelList.clear();
+    softList.clear();
 }

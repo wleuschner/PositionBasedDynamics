@@ -3,10 +3,11 @@
 #include <QDebug>
 #include <QGLWidget>
 #include <QKeyEvent>
+#include <QMatrix3x3>
 #include <glm/gtc/matrix_transform.hpp>
 
 Canvas::Canvas(QWidget *parent) :
-    QGLWidget(parent), vertexBuffer(QGLBuffer::VertexBuffer)
+    QGLWidget(parent), vertexBuffer(QOpenGLBuffer::VertexBuffer)
 {
     QGLFormat format;
     format.setVersion(3,4);
@@ -41,40 +42,15 @@ void Canvas::initializeGL()
     vao.bind();
     shader.bind();
     mesh = Entity(Model::createCylinder(2,32,32));
+    //mesh = Entity(Model::createSphere(2,32,32));
     //mesh = Entity(Model::createPlaneXY(16,16,32,32));
     //mesh->load("/home/wladimir/Model/triangle.obj");
     QMatrix4x4 model;
-    model.translate(0,0,0);
+    model.setToIdentity();
     mesh.setMatrix(model);
-    //mesh = Model::createPlaneXY(16,16,16,16);
+    //sphere.setMatrix(model);
+    //mesh = Entity(Model::createPlaneXY(16,16,16,16));
     solver.addModel(mesh);
-
-    shader.setAttributeBuffer("vertex",GL_FLOAT,0,3,sizeof(Vertex));
-    shader.enableAttributeArray("vertex");
-
-    shader.setAttributeBuffer("normal",GL_FLOAT,sizeof(float)*3,3,sizeof(Vertex));
-    shader.enableAttributeArray("normal");
-
-    shader.setAttributeBuffer("uv",GL_FLOAT,sizeof(float)*6,2,sizeof(Vertex));
-    shader.enableAttributeArray("uv");
-
-    shader.setAttributeBuffer("ambient",GL_FLOAT,sizeof(float)*8,3,sizeof(Vertex));
-    shader.enableAttributeArray("ambient");
-
-    shader.setAttributeBuffer("diffuse",GL_FLOAT,sizeof(float)*11,3,sizeof(Vertex));
-    shader.enableAttributeArray("diffuse");
-
-    shader.setAttributeBuffer("specular",GL_FLOAT,sizeof(float)*14,3,sizeof(Vertex));
-    shader.enableAttributeArray("specular");
-
-    shader.setAttributeBuffer("shininess",GL_FLOAT,sizeof(float)*17,1,sizeof(Vertex));
-    shader.enableAttributeArray("shininess");
-
-    shader.setAttributeBuffer("mass",GL_FLOAT,sizeof(float)*18,1,sizeof(Vertex));
-    shader.enableAttributeArray("mass");
-
-    shader.setAttributeBuffer("velocity",GL_FLOAT,sizeof(float)*19,3,sizeof(Vertex));
-    shader.enableAttributeArray("velocity");
 
     QVector3D l_pos=QVector3D(20.0,0.0,10.0);
     QVector3D l_amb=QVector3D(0.2,0.2,0.2);
@@ -107,16 +83,13 @@ void Canvas::paintGL()
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     view.setToIdentity();
     view=camera.lookAt();
-    //modelview.translate(pos);
-    //modelview.rotate(180.0,0.0,1.0,0.0);
-
 
     shader.bind();
-
-    shader.setUniformValue("model",mesh.getMatrix());
     shader.setUniformValueArray("view",&view,1);
+
     vao.bind();
-    mesh.draw();
+    mesh.draw(shader);
+    //sphere.draw(shader);
 }
 
 void Canvas::keyPressEvent(QKeyEvent* event)
@@ -152,12 +125,12 @@ void Canvas::update()
 
 bool Canvas::prepareShader(const QString& vertexShaderPath,const QString& fragmentShaderPath)
 {
-    bool result = shader.addShaderFromSourceFile(QGLShader::Vertex,vertexShaderPath);
+    bool result = shader.addShaderFromSourceFile(QOpenGLShader::Vertex,vertexShaderPath);
     if(!result)
     {
         qWarning()<<shader.log();
     }
-    result = shader.addShaderFromSourceFile(QGLShader::Fragment,fragmentShaderPath);
+    result = shader.addShaderFromSourceFile(QOpenGLShader::Fragment,fragmentShaderPath);
     if(!result)
     {
         qWarning()<<shader.log();

@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     mesh.cpp \
     solver.cpp \
     face.cpp \
-    entity.cpp
+    entity.cpp \
+    spatialhash.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -35,7 +36,8 @@ HEADERS  += mainwindow.h \
     mesh.h \
     solver.h \
     face.h \
-    entity.h
+    entity.h \
+    spatialhash.h
 
 FORMS    += mainwindow.ui
 

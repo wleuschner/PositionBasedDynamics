@@ -11,6 +11,7 @@ struct LightSource
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
+uniform mat3 normalMatrix;
 uniform vec3 cameraPos;
 
 //Lighting Block
@@ -32,7 +33,6 @@ in float velocity;
 out vec4 frag_color;
 
 void main(void) {
-    mat3 normalMatrix = transpose(inverse(mat3(model)));
     vec3 n = normalize(normalMatrix * normal);
     vec3 p = (model * vec4(vertex,1.0)).xyz;
 

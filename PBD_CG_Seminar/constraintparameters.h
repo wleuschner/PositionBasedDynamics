@@ -2,9 +2,8 @@
 #define CONSTRAINTPARAMETERS_H
 #include <QVector3D>
 
-class ConstraintParameters
+struct ConstraintParameters
 {
-public:
     ConstraintParameters();
     ConstraintParameters(QVector3D* point,QVector3D normal,float distance);
 
