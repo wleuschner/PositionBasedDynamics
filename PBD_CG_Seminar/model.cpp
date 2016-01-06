@@ -68,9 +68,14 @@ bool Model::load(std::string path)
         }
         for(int i=0;i<mesh->mNumFaces;i++)
         {
-            indices.push_back(mesh->mFaces[i].mIndices[0]);
-            indices.push_back(mesh->mFaces[i].mIndices[1]);
-            indices.push_back(mesh->mFaces[i].mIndices[2]);
+            Face f;
+            f.v1=mesh->mFaces[i].mIndices[0];
+            f.v2=mesh->mFaces[i].mIndices[1];
+            f.v3=mesh->mFaces[i].mIndices[2];
+            indices.push_back(f.v1);
+            indices.push_back(f.v2);
+            indices.push_back(f.v3);
+            faces.push_back(f);
         }
     }
     createVBO();
@@ -95,6 +100,34 @@ void Model::update()
     release();
     createVBO();
     bind();
+}
+
+void Model::recalNormals()
+{
+    for(int f=0;f<faces.size();f++)
+    {
+        Face face = faces[f];
+        QVector3D v1 = vertices[face.v1].getPos();
+        QVector3D v2 = vertices[face.v2].getPos();
+        QVector3D v3 = vertices[face.v3].getPos();
+        faces[f].normal = QVector3D::crossProduct(v1-v2,v1-v3).normalized();
+    }
+    for(int v=0;v<vertices.size();v++)
+    {
+        QVector3D norm = QVector3D(0,0,0);
+        int numFaces = 0;
+        for(int f=0;f<faces.size();f++)
+        {
+            Face face = faces[f];
+            if(face.v1 == v || face.v2 == v || face.v3 == v)
+            {
+                norm += face.normal;
+                numFaces++;
+            }
+        }
+        norm = (norm/numFaces).normalized();
+        vertices[v].setNormal(norm);
+    }
 }
 
 QVector<Vertex>& Model::getVertices()
@@ -361,7 +394,7 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
         {
             fmax(r,y);
             model->position.push_back(QVector3D(radius*cosf(angle),y,radius*sinf(angle)));
-            model->normal.push_back(QVector3D(0.0,0.0,1.0));
+            model->normal.push_back(QVector3D(cosf(angle),0.0,sinf(angle)));
             model->uv_coords.push_back(QVector2D(x/((float)slices),y/((float)stacks)));
         }
     }
@@ -383,9 +416,11 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
         model->vertices.push_back(v);
 
     }
-    for(int y=0;y<stacks-1;y++)
+    int y;
+    for(y=0;y<stacks-1;y++)
     {
-        for(int x=0;x<slices-1;x++)
+        int x;
+        for(x=0;x<slices-1;x++)
         {
             Face f1,f2;
             //Face 1
@@ -418,6 +453,38 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
             p3 = &model->vertices[f2.v3];
             model->shash->insert(p1,p2,p3);
         }
+
+        Face f1,f2;
+
+        //Face 1
+        model->indices.push_back(y*slices+x);
+        f1.v1=y*slices+x;
+        model->indices.push_back((y+1)*slices+x);
+        f1.v2=(y+1)*slices+x;
+        model->indices.push_back(y*slices);
+        f1.v3=y*slices;
+        model->faces.push_back(f1);
+
+        //Insert into Spatial Hash
+        Vertex* p1 = &model->vertices[f1.v1];
+        Vertex* p2 = &model->vertices[f1.v2];
+        Vertex* p3 = &model->vertices[f1.v3];
+        model->shash->insert(p1,p2,p3);
+
+        //Face 2
+        model->indices.push_back((y+1)*slices+x);
+        f2.v1=(y+1)*slices+x;
+        model->indices.push_back((y+1)*slices);
+        f2.v2=(y+1)*slices;
+        model->indices.push_back(y*slices);
+        f2.v3=y*slices;
+        model->faces.push_back(f2);
+
+        //Insert into Spatial Hash
+        p1 = &model->vertices[f2.v1];
+        p2 = &model->vertices[f2.v2];
+        p3 = &model->vertices[f2.v3];
+        model->shash->insert(p1,p2,p3);
     }
     model->createVBO();
     model->createIndex();
@@ -427,8 +494,8 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
 Model* Model::createSphere(float radius,int stacks,int slices)
 {
     Model *model = new Model();
-    float angle1_inc = PI2/stacks;
-    float angle2_inc = PI2/(slices*2);
+    float angle1_inc = (PI2/2)/(stacks-1);
+    float angle2_inc = PI2/slices;
     float angle1 = 0.0;
     for(int y=0;y<stacks;y++,angle1+=angle1_inc)
     {
@@ -459,7 +526,8 @@ Model* Model::createSphere(float radius,int stacks,int slices)
     }
     for(int y=0;y<stacks-1;y++)
     {
-        for(int x=0;x<slices-1;x++)
+        int x;
+        for(x=0;x<slices-1;x++)
         {
             Face f1,f2;
             //Face 1
@@ -480,7 +548,28 @@ Model* Model::createSphere(float radius,int stacks,int slices)
             f2.v3=y*slices+(x+1);
             model->faces.push_back(f2);
         }
+        Face f1,f2;
+
+        //Face 1
+        model->indices.push_back(y*slices+x);
+        f1.v1=y*slices+x;
+        model->indices.push_back((y+1)*slices+x);
+        f1.v2=(y+1)*slices+x;
+        model->indices.push_back(y*slices);
+        f1.v3=y*slices;
+        model->faces.push_back(f1);
+
+        //Face 2
+        model->indices.push_back((y+1)*slices+x);
+        f2.v1=(y+1)*slices+x;
+        model->indices.push_back((y+1)*slices);
+        f2.v2=(y+1)*slices;
+        model->indices.push_back(y*slices);
+        f2.v3=y*slices;
+        model->faces.push_back(f2);
+
     }
+    model->recalNormals();
     model->createVBO();
     model->createIndex();
     return model;

@@ -41,8 +41,8 @@ void Canvas::initializeGL()
     vao.create();
     vao.bind();
     shader.bind();
-    mesh = Entity(Model::createCylinder(2,32,32));
-    //mesh = Entity(Model::createSphere(2,32,32));
+    //mesh = Entity(Model::createCylinder(2,4,4));
+    mesh = Entity(Model::createSphere(2,16,16));
     //mesh = Entity(Model::createPlaneXY(16,16,32,32));
     //mesh->load("/home/wladimir/Model/triangle.obj");
     QMatrix4x4 model;
@@ -52,7 +52,7 @@ void Canvas::initializeGL()
     //mesh = Entity(Model::createPlaneXY(16,16,16,16));
     solver.addModel(mesh);
 
-    QVector3D l_pos=QVector3D(20.0,0.0,10.0);
+    QVector3D l_pos=QVector3D(20.0,0.0,0.0);
     QVector3D l_amb=QVector3D(0.2,0.2,0.2);
     QVector3D l_dif=QVector3D(0.4,0.4,0.4);
     QVector3D l_spec = QVector3D(0.8,0.8,0.8);
@@ -88,7 +88,7 @@ void Canvas::paintGL()
     shader.setUniformValueArray("view",&view,1);
 
     vao.bind();
-    mesh.draw(shader);
+    mesh.draw(shader,view);
     //sphere.draw(shader);
 }
 

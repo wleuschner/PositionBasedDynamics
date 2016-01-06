@@ -35,6 +35,7 @@ public:
     static Model* createTorus(float inner,float outer,int stacks,int slices);
 
     void update();
+    void recalNormals();
 private:
     bool createVBO();
     bool createIndex();

@@ -34,10 +34,12 @@ Model* Entity::getModel()
     return model;
 }
 
-void Entity::draw(QOpenGLShaderProgram& shader)
+void Entity::draw(QOpenGLShaderProgram& shader,QMatrix4x4& view)
 {
-    QMatrix3x3 normalMatrix = mat.normalMatrix();
+    QMatrix4x4 modelView = view*mat;
+    QMatrix3x3 normalMatrix = modelView.normalMatrix();
     shader.setUniformValue("model",mat);
+    shader.setUniformValue("modelView",modelView);
     shader.setUniformValue("normalMatrix",normalMatrix);
     model->draw(shader);
 }

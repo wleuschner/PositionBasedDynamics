@@ -1,4 +1,4 @@
-#version 140
+#version 130
 //Lighting struct
 struct LightSource
 {
@@ -10,6 +10,7 @@ struct LightSource
 
 uniform mat4 model;
 uniform mat4 view;
+uniform mat4 modelView;
 uniform mat4 projection;
 uniform mat3 normalMatrix;
 uniform vec3 cameraPos;
@@ -30,22 +31,12 @@ in float mass;
 in float velocity;
 
 //Fragment input params
-out vec4 frag_color;
+out vec3 frag_position;
+out vec3 frag_normal;
 
 void main(void) {
-    vec3 n = normalize(normalMatrix * normal);
-    vec3 p = (model * vec4(vertex,1.0)).xyz;
 
-    vec3 l_dir = normalize(light[0].pos - p);
-    float dif = max(dot(l_dir,n),0.0);
-    float spec = 0.0;
-    if(dif>0.0)
-    {
-        spec = pow(dot(reflect(l_dir,n),vec3(0.0,0.0,-1.0)),shininess);
-    }
-    float r=light[0].amb.r+light[0].dif.r*dif+light[0].spec.r*specular.r*spec;
-    float g=light[0].amb.g+light[0].dif.g*dif+light[0].spec.g*specular.g*spec;
-    float b=light[0].amb.b+light[0].dif.b*dif+light[0].spec.b*specular.b*spec;
-    frag_color = vec4(r,g,b,1.0);
-    gl_Position = projection * view * model * vec4(vertex,1.0);
+    frag_normal = normal;
+    frag_position = vertex;
+    gl_Position = projection * modelView * vec4(vertex,1.0);
 }
