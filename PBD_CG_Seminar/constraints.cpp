@@ -52,3 +52,7 @@ void solveEnviromentConstraint(const QVector3D& p1,const QVector3D& n,float d,QV
         dp1 += (fabs(dist)+NUMERIC_DELTA)*n;
     }
 }
+
+void solveTetrahedralConstraint(QVector<Vertex>& vertices,QVector<Face>& faces,float volume,float pressure)
+{
+}

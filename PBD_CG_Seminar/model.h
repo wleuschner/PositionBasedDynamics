@@ -37,10 +37,12 @@ public:
     void update();
     void recalNormals();
 private:
+    float calcVolume();
     bool createVBO();
     bool createIndex();
 
     std::string name;
+    float volume;
     QVector<unsigned int> indices;
     QVector<Face> faces;
 

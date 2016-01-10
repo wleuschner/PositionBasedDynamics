@@ -78,6 +78,8 @@ bool Model::load(std::string path)
             faces.push_back(f);
         }
     }
+    volume = calcVolume();
+    qDebug()<<volume;
     createVBO();
     createIndex();
     return true;
@@ -100,6 +102,20 @@ void Model::update()
     release();
     createVBO();
     bind();
+}
+
+float Model::calcVolume()
+{
+    float volume = 0;
+    for(int f=0;f<faces.size();f++)
+    {
+        Face face = faces[f];
+        QVector3D v1 = vertices[face.v1].getPos();
+        QVector3D v2 = vertices[face.v2].getPos();
+        QVector3D v3 = vertices[face.v3].getPos();
+        volume += QVector3D::dotProduct(v1,QVector3D::crossProduct(v2,v3))/6.0;
+    }
+    return volume;
 }
 
 void Model::recalNormals()
@@ -486,8 +502,10 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
         p3 = &model->vertices[f2.v3];
         model->shash->insert(p1,p2,p3);
     }
+    model->volume = model->calcVolume();
     model->createVBO();
     model->createIndex();
+    qDebug()<<model->volume;
     return model;
 }
 
@@ -569,6 +587,7 @@ Model* Model::createSphere(float radius,int stacks,int slices)
         model->faces.push_back(f2);
 
     }
+    model->volume = model->calcVolume();
     model->recalNormals();
     model->createVBO();
     model->createIndex();

@@ -137,7 +137,7 @@ void Canvas::createCube()
 void Canvas::createCylinder()
 {
     mesh.release();
-    mesh = Entity(Model::createCylinder(2,16,16));
+    mesh = Entity(Model::createCylinder(2,2,32));
 }
 
 void Canvas::createSphere()
