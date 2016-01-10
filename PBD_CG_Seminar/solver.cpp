@@ -1,10 +1,10 @@
 #include "solver.h"
 #include <math.h>
-#define NUMERIC_DELTA 0.015625
+#include "constraints.h"
 
 Solver::Solver()
 {
-    solverLoops = 5;
+    solverLoops = 10;
 }
 
 void Solver::solve()
@@ -59,6 +59,7 @@ void Solver::solve()
         for(int i=0;i<solverLoops;i++)
         {
             //Solve General Constraints
+            float k_stretch = 1 - pow(1-0.5,1.0/solverLoops);
             for(QVector<unsigned int>::iterator j=indices.begin();std::distance(j,indices.end())>1;j++)
             {
                 QVector3D p1 = positions[*j].getPos();
@@ -67,7 +68,8 @@ void Solver::solve()
                 QVector3D x2 = vertices[*(j+1)].getPos();
                 QVector3D dp1(0,0,0),dp2(0,0,0);
 
-                solveDistanceConstraint(p1,p2,(x1-x2).length(),0.5,0.5,dp1,dp2);
+
+                solveDistanceConstraint(p1,p2,(x1-x2).length(),k_stretch,k_stretch,dp1,dp2);
                 p1 += dp1;
                 p2 += dp2;
 
@@ -95,44 +97,6 @@ void Solver::solve()
         constraints.clear();
         m->recalNormals();
         m->update();
-    }
-}
-
-void Solver::solveDistanceConstraint(const QVector3D& p1,const QVector3D& p2,float l0,float compression_k,float stretch_k,QVector3D& dp1,QVector3D& dp2)
-{
-    //QVector3D result = (1/((a-b).length()))*(a-b);
-    QVector3D p1p2 = (p1-p2);
-    QVector3D normal = p1p2.normalized();
-    float p1p2_len = p1p2.length();
-
-    QVector3D dp = QVector3D(0,0,0);
-
-    if(p1p2_len>l0)
-    {
-        dp = (1-pow((1-stretch_k),1.0/solverLoops))*(p1p2_len-l0)*normal;
-    }
-    else
-    {
-        dp = (1-pow((1-compression_k),1.0/solverLoops))*(p1p2_len-l0)*normal;
-    }
-    dp1=-dp;
-    dp2=dp;
-}
-
-void Solver::solveBendConstraint(const QVector3D& p1,const QVector3D& p2,float phi,QVector3D& dp1,QVector3D& dp2)
-{
-}
-
-void Solver::solveTetrahedralConstraint(const QVector3D& p1,const QVector3D& p2,const QVector3D& p3,const QVector3D& p4,float v0)
-{
-}
-
-void Solver::solveEnviromentConstraint(const QVector3D& p1,const QVector3D& n,float d,QVector3D& dp1)
-{
-    float dist = QVector3D::dotProduct(p1,n)-d;
-    if(dist<0.0)
-    {
-        dp1 += (fabs(dist)+NUMERIC_DELTA)*n;
     }
 }
 

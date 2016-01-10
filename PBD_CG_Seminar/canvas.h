@@ -30,6 +30,11 @@ signals:
 
 public slots:
     void update();
+    void changeModel(QString file);
+    void createCube();
+    void createCylinder();
+    void createSphere();
+    void createTorus();
 
 private:
     void uploadLight(Light& light,int index);

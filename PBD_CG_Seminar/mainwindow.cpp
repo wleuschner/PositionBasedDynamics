@@ -16,6 +16,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
-    event->accept();
+    event->ignore();
 }
 

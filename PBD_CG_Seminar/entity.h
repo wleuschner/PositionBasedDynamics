@@ -14,6 +14,7 @@ public:
 
     Model* getModel();
 
+    void release();
     void draw(QOpenGLShaderProgram& shader,QMatrix4x4& view);
 private:
     Model* model;

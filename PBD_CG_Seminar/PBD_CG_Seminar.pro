@@ -24,7 +24,9 @@ SOURCES += main.cpp\
     solver.cpp \
     face.cpp \
     entity.cpp \
-    spatialhash.cpp
+    spatialhash.cpp \
+    abstractsolver.cpp \
+    constraints.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -37,7 +39,9 @@ HEADERS  += mainwindow.h \
     solver.h \
     face.h \
     entity.h \
-    spatialhash.h
+    spatialhash.h \
+    abstractsolver.h \
+    constraints.h
 
 FORMS    += mainwindow.ui
 

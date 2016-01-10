@@ -42,7 +42,8 @@ void Canvas::initializeGL()
     vao.bind();
     shader.bind();
     //mesh = Entity(Model::createCylinder(2,4,4));
-    mesh = Entity(Model::createSphere(2,16,16));
+    //createSphere();
+    createCylinder();
     //mesh = Entity(Model::createPlaneXY(16,16,32,32));
     //mesh->load("/home/wladimir/Model/triangle.obj");
     QMatrix4x4 model;
@@ -122,6 +123,33 @@ void Canvas::update()
     solver.solve();
     updateGL();
 }
+
+void Canvas::changeModel(QString file)
+{
+    mesh.release();
+    //mesh = Entity(Model::load(file.toStdString()));
+}
+
+void Canvas::createCube()
+{
+}
+
+void Canvas::createCylinder()
+{
+    mesh.release();
+    mesh = Entity(Model::createCylinder(2,16,16));
+}
+
+void Canvas::createSphere()
+{
+    mesh.release();
+    mesh = Entity(Model::createSphere(2,16,16));
+}
+
+void Canvas::createTorus()
+{
+}
+
 
 bool Canvas::prepareShader(const QString& vertexShaderPath,const QString& fragmentShaderPath)
 {

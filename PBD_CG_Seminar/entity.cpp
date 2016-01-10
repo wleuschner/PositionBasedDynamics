@@ -34,6 +34,14 @@ Model* Entity::getModel()
     return model;
 }
 
+void Entity::release()
+{
+    if(model!=NULL)
+    {
+        model->release();
+    }
+}
+
 void Entity::draw(QOpenGLShaderProgram& shader,QMatrix4x4& view)
 {
     QMatrix4x4 modelView = view*mat;
