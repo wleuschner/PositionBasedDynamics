@@ -53,6 +53,61 @@ void solveEnviromentConstraint(const QVector3D& p1,const QVector3D& n,float d,QV
     }
 }
 
-void solveTetrahedralConstraint(QVector<Vertex>& vertices,QVector<Face>& faces,float volume,float pressure)
+void solveTetrahedralConstraint(QVector<Vertex>& vertices,QVector<Face>& facelist,const QMap<int,QList<Face*>*> facemap,float volume,float pressure,QVector<QVector3D>& dp)
 {
+    for(int v=0;v<vertices.size();v++)
+    {
+        QList<Face*>* faces = facemap.value(v);
+        dp[v] = QVector3D(0,0,0);
+        //qDebug()<<faces->size();
+        for(QList<Face*>::iterator f = faces->begin();f!=faces->end();f++)
+        {
+            if(v == (*f)->v1)
+            {
+                QVector3D fv1 = vertices[(*f)->v2].getPos();
+                QVector3D fv2 = vertices[(*f)->v3].getPos();
+                //qDebug()<<"Cross1:"<<QVector3D::crossProduct(fv1,fv2);
+                dp[v] += QVector3D::crossProduct(fv1,fv2);
+            }
+            else if(v == (*f)->v2)
+            {
+                QVector3D fv1 = vertices[(*f)->v3].getPos();
+                QVector3D fv2 = vertices[(*f)->v1].getPos();
+                //qDebug()<<"Cross2:"<<QVector3D::crossProduct(fv1,fv2);
+                dp[v] += QVector3D::crossProduct(fv1,fv2);
+            }
+            else if(v == (*f)->v3)
+            {
+                QVector3D fv1 = vertices[(*f)->v1].getPos();
+                QVector3D fv2 = vertices[(*f)->v2].getPos();
+                //qDebug()<<"Cross3:"<<QVector3D::crossProduct(fv1,fv2);
+                dp[v] += QVector3D::crossProduct(fv1,fv2);
+            }
+        }
+    }
+
+    float sum = 0;
+    for(int i=0;i<dp.size();i++)
+    {
+        sum += dp[i].lengthSquared();
+    }
+
+    float newVolume = 0.0;
+    for(int f=0;f<facelist.size();f++)
+    {
+        Face face = facelist[f];
+        QVector3D v1 = vertices[face.v1].getPos();
+        QVector3D v2 = vertices[face.v2].getPos();
+        QVector3D v3 = vertices[face.v3].getPos();
+        newVolume += QVector3D::dotProduct(v3,QVector3D::crossProduct(v1,v2));
+    }
+    newVolume = newVolume-pressure*volume;
+    float s = -(newVolume/sum);
+    //qDebug()<<newVolume;
+
+    for(int i=0;i<dp.size();i++)
+    {
+        dp[i] = s*dp[i];
+        //qDebug()<<dp[i];
+    }
 }

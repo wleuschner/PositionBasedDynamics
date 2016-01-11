@@ -4,9 +4,9 @@ ConstraintParameters::ConstraintParameters()
 {
 }
 
-ConstraintParameters::ConstraintParameters(QVector3D* point,QVector3D normal,float distance) : point(point)
+ConstraintParameters::ConstraintParameters(int index,QVector3D normal,float distance)
 {
-    this->point=point;
+    this->index=index;
     this->normal=normal;
     this->distance=distance;
 }

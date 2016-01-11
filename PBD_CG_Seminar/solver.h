@@ -3,24 +3,22 @@
 #include<QVector>
 #include<QVector3D>
 #include<QList>
+#include"abstractsolver.h"
 #include"entity.h"
 #include"constraintparameters.h"
 
-class Solver
+class Solver : public AbstractSolver
 {
 public:
     Solver();
 
     void solve();
-    void addModel(Entity model);
+    void addSoftBody(Entity model);
+    void addBallonBody(Entity model);
+    void addRigidBody(Entity model);
     void reset();
 private:
-    int solverLoops;
-
     QVector<ConstraintParameters> constraints;
-
-    QList<Entity> softList;
-    QList<Entity> rigidList;
 };
 
 #endif // SOLVER_H

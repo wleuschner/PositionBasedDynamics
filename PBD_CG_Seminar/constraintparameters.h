@@ -5,9 +5,9 @@
 struct ConstraintParameters
 {
     ConstraintParameters();
-    ConstraintParameters(QVector3D* point,QVector3D normal,float distance);
+    ConstraintParameters(int index,QVector3D normal,float distance);
 
-    QVector3D* point;
+    int index;
     QVector3D normal;
     float distance;
 };

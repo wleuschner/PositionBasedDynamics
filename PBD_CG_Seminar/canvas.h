@@ -11,7 +11,7 @@
 #include "camera.h"
 #include "light.h"
 #include "entity.h"
-#include "solver.h"
+#include "abstractsolver.h"
 
 class Canvas : public QGLWidget
 {
@@ -60,7 +60,7 @@ private:
     QMatrix4x4 view;
     QMatrix4x4 model;
 
-    Solver solver;
+    AbstractSolver* solver;
 };
 
 #endif // CANVAS_H

@@ -22,9 +22,13 @@ public:
     void bind();
     void draw(QOpenGLShaderProgram& shader);
 
+    float getOriginalEdgeLength(int v1,int v2);
     QVector<Vertex>& getVertices();
     QVector<unsigned int>& getIndices();
     QVector<Face>& getFaces();
+    const QMap<int,QList<Face*>*>& getFacemap();
+    float getVolume();
+
 
     //Primitives
     static Model* createPlaneXZ(float width,float height,int xPatches,int zPatches);
@@ -38,6 +42,7 @@ public:
     void recalNormals();
 private:
     float calcVolume();
+    void createFacemap();
     bool createVBO();
     bool createIndex();
 
@@ -45,6 +50,7 @@ private:
     float volume;
     QVector<unsigned int> indices;
     QVector<Face> faces;
+    QMap<int,QList<Face*>*> facemap;
 
     QVector<QVector3D> position;
     QVector<QVector3D> normal;

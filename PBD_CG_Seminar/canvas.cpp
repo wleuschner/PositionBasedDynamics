@@ -4,7 +4,7 @@
 #include <QGLWidget>
 #include <QKeyEvent>
 #include <QMatrix3x3>
-#include <glm/gtc/matrix_transform.hpp>
+#include "solver.h"
 
 Canvas::Canvas(QWidget *parent) :
     QGLWidget(parent), vertexBuffer(QOpenGLBuffer::VertexBuffer)
@@ -15,6 +15,7 @@ Canvas::Canvas(QWidget *parent) :
     format.setSampleBuffers(true);
     setFormat(format);
     camera.move(QVector3D(0.0,0.0,100.0));
+    solver = new Solver();
 }
 
 void Canvas::initializeGL()
@@ -42,16 +43,19 @@ void Canvas::initializeGL()
     vao.bind();
     shader.bind();
     //mesh = Entity(Model::createCylinder(2,4,4));
-    //createSphere();
-    createCylinder();
+    createSphere();
+    //createCylinder();
+    //changeModel("/home/wladimir/Model/cube.obj");
     //mesh = Entity(Model::createPlaneXY(16,16,32,32));
-    //mesh->load("/home/wladimir/Model/triangle.obj");
+    //mesh->load("/home/wladimir/Model/Duck/ducky.obj");
     QMatrix4x4 model;
     model.setToIdentity();
+    model.scale(1);
     mesh.setMatrix(model);
     //sphere.setMatrix(model);
     //mesh = Entity(Model::createPlaneXY(16,16,16,16));
-    solver.addModel(mesh);
+    //solver->addSoftBody(mesh);
+    solver->addBallonBody(mesh);
 
     QVector3D l_pos=QVector3D(20.0,0.0,0.0);
     QVector3D l_amb=QVector3D(0.2,0.2,0.2);
@@ -120,14 +124,12 @@ void Canvas::keyPressEvent(QKeyEvent* event)
 
 void Canvas::update()
 {
-    solver.solve();
+    solver->solve();
     updateGL();
 }
 
 void Canvas::changeModel(QString file)
 {
-    mesh.release();
-    //mesh = Entity(Model::load(file.toStdString()));
 }
 
 void Canvas::createCube()
@@ -137,13 +139,20 @@ void Canvas::createCube()
 void Canvas::createCylinder()
 {
     mesh.release();
-    mesh = Entity(Model::createCylinder(2,2,32));
+    mesh = Entity(Model::createCylinder(2,32,32));
 }
 
 void Canvas::createSphere()
 {
     mesh.release();
-    mesh = Entity(Model::createSphere(2,16,16));
+    Model *m = new Model();
+    //m->load("/home/wladimir/Model/cube.obj");
+    m->load("/home/wladimir/Model/sphere/sphere.obj");
+    //m->load("/home/wladimir/Model/Duck/DUCK.3DS");
+    mesh = Entity(m);
+
+    //mesh.release();
+    //mesh = Entity(Model::createSphere(2,64,64));
 }
 
 void Canvas::createTorus()

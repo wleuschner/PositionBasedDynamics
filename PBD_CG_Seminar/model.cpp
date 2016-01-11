@@ -25,29 +25,32 @@ bool Model::load(std::string path)
 {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path,aiProcess_Triangulate|aiProcess_PreTransformVertices|aiProcess_JoinIdenticalVertices|aiProcess_GenNormals);
-    for(unsigned int j=0;j<scene->mNumMeshes;j++)
+    for(unsigned int j=0;j</*scene->mNumMeshes*/1;j++)
     {
         const aiMesh* mesh = scene->mMeshes[j];
+        aiColor3D mat_ambient;
+        aiColor3D mat_diffuse;
+        aiColor3D mat_specular;
 
         int mat_index = mesh->mMaterialIndex;
         const aiMaterial* mat = scene->mMaterials[mat_index];
 
-        aiColor3D mat_ambient;
-        aiColor3D mat_diffuse;
-        aiColor3D mat_specular;
         float mat_shininess;
+
         mat->Get(AI_MATKEY_COLOR_AMBIENT,mat_ambient);
         mat->Get(AI_MATKEY_COLOR_DIFFUSE,mat_diffuse);
         mat->Get(AI_MATKEY_COLOR_SPECULAR,mat_specular);
         mat->Get(AI_MATKEY_SHININESS,mat_shininess);
+        position.reserve(mesh->mNumVertices);
         for(unsigned int i=0;i<mesh->mNumVertices;i++)
         {
             aiVector3D v = mesh->mVertices[i];
-            position.push_back(QVector3D(v[0],v[1],v[2]));
+            QVector3D pos = QVector3D(v.x,v.y,v.z);
+            position.push_back(pos);
             if(mesh->HasNormals())
             {
                 aiVector3D n = mesh->mNormals[i];
-                normal.push_back(QVector3D(n[0],n[1],n[2]));
+                normal.push_back(QVector3D(n.x,n.y,n.z));
             }
             //if(mesh->HasTextureCoords())
             //{
@@ -78,8 +81,10 @@ bool Model::load(std::string path)
             faces.push_back(f);
         }
     }
+    createFacemap();
     volume = calcVolume();
     qDebug()<<volume;
+    recalNormals();
     createVBO();
     createIndex();
     return true;
@@ -113,9 +118,28 @@ float Model::calcVolume()
         QVector3D v1 = vertices[face.v1].getPos();
         QVector3D v2 = vertices[face.v2].getPos();
         QVector3D v3 = vertices[face.v3].getPos();
-        volume += QVector3D::dotProduct(v1,QVector3D::crossProduct(v2,v3))/6.0;
+        volume += QVector3D::dotProduct(v3,QVector3D::crossProduct(v1,v2));
     }
     return volume;
+}
+
+void Model::createFacemap()
+{
+    for(int v=0;v<vertices.size();v++)
+    {
+        for(int f=0;f<faces.size();f++)
+        {
+            Face face = faces[f];
+            if(face.v1 == v || face.v2 == v || face.v3 == v)
+            {
+                if(!facemap.contains(v))
+                {
+                    facemap.insert(v,new QList<Face*>());
+                }
+                facemap.value(v)->append(&faces[f]);
+            }
+        }
+    }
 }
 
 void Model::recalNormals()
@@ -131,19 +155,22 @@ void Model::recalNormals()
     for(int v=0;v<vertices.size();v++)
     {
         QVector3D norm = QVector3D(0,0,0);
-        int numFaces = 0;
-        for(int f=0;f<faces.size();f++)
+        QList<Face*>* facelist = facemap.value(v);
+        int numFaces = facelist->size();
+        for(QList<Face*>::iterator f = facelist->begin();f!=facelist->end();f++)
         {
-            Face face = faces[f];
-            if(face.v1 == v || face.v2 == v || face.v3 == v)
-            {
-                norm += face.normal;
-                numFaces++;
-            }
+            norm += (*f)->normal;
         }
         norm = (norm/numFaces).normalized();
         vertices[v].setNormal(norm);
     }
+}
+
+float Model::getOriginalEdgeLength(int v1,int v2)
+{
+    QVector3D a=position[v1];
+    QVector3D b=position[v2];
+    return (a-b).length();
 }
 
 QVector<Vertex>& Model::getVertices()
@@ -161,6 +188,15 @@ QVector<Face>& Model::getFaces()
     return faces;
 }
 
+const QMap<int,QList<Face*>*>& Model::getFacemap()
+{
+    return facemap;
+}
+
+float Model::getVolume()
+{
+    return volume;
+}
 
 bool Model::createVBO()
 {
@@ -277,7 +313,9 @@ Model* Model::createPlaneXZ(float width,float height,int xPatches,int zPatches)
         v.setVelocity(QVector3D(0,0,0));
         model->vertices.push_back(v);
     }
+    model->createFacemap();
     model->createVBO();
+    model->createIndex();
     return model;
 }
 
@@ -338,6 +376,7 @@ Model* Model::createPlaneXY(float width,float height,int xPatches,int yPatches)
             model->faces.push_back(f2);
         }
     }
+    model->createFacemap();
     model->createVBO();
     model->createIndex();
     return model;
@@ -394,7 +433,9 @@ Model* Model::createPlaneYZ(float width,float height,int yPatches,int zPatches)
         v.setVelocity(QVector3D(0,0,0));
         model->vertices.push_back(v);
     }
+    model->createFacemap();
     model->createVBO();
+    model->createIndex();
     return model;
 }
 
@@ -502,6 +543,7 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
         p3 = &model->vertices[f2.v3];
         model->shash->insert(p1,p2,p3);
     }
+    model->createFacemap();
     model->volume = model->calcVolume();
     model->createVBO();
     model->createIndex();
@@ -587,6 +629,7 @@ Model* Model::createSphere(float radius,int stacks,int slices)
         model->faces.push_back(f2);
 
     }
+    model->createFacemap();
     model->volume = model->calcVolume();
     model->recalNormals();
     model->createVBO();
