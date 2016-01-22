@@ -61,10 +61,6 @@ bool Model::load(std::string path)
             vert.setPos(position[i]);
             vert.setNormal(normal[i]);
             vert.setUv(QVector2D(0,0));
-            vert.setAmbient(QVector3D(mat_ambient.r,mat_ambient.g,mat_ambient.b));
-            vert.setDiffuse(QVector3D(mat_diffuse.r,mat_diffuse.g,mat_specular.b));
-            vert.setSpecular(QVector3D(mat_specular.r,mat_specular.g,mat_specular.b));
-            vert.setShininess(1.0);
             vert.setMass(1.0f);
             vert.setVelocity(QVector3D(0,0,0));
             vertices.push_back(vert);
@@ -228,6 +224,16 @@ bool Model::createIndex()
     index.allocate(indices.constData(),sizeof(unsigned int)*indices.length());
     return true;
 }
+Material Model::getMaterial() const
+{
+    return material;
+}
+
+void Model::setMaterial(const Material &value)
+{
+    material = value;
+}
+
 
 void Model::draw(QOpenGLShaderProgram& shader)
 {
@@ -241,23 +247,21 @@ void Model::draw(QOpenGLShaderProgram& shader)
     shader.setAttributeBuffer("uv",GL_FLOAT,sizeof(float)*6,2,sizeof(Vertex));
     shader.enableAttributeArray("uv");
 
-    shader.setAttributeBuffer("ambient",GL_FLOAT,sizeof(float)*8,3,sizeof(Vertex));
-    shader.enableAttributeArray("ambient");
-
-    shader.setAttributeBuffer("diffuse",GL_FLOAT,sizeof(float)*11,3,sizeof(Vertex));
-    shader.enableAttributeArray("diffuse");
-
-    shader.setAttributeBuffer("specular",GL_FLOAT,sizeof(float)*14,3,sizeof(Vertex));
-    shader.enableAttributeArray("specular");
-
-    shader.setAttributeBuffer("shininess",GL_FLOAT,sizeof(float)*17,1,sizeof(Vertex));
-    shader.enableAttributeArray("shininess");
-
     shader.setAttributeBuffer("mass",GL_FLOAT,sizeof(float)*18,1,sizeof(Vertex));
     shader.enableAttributeArray("mass");
 
     shader.setAttributeBuffer("velocity",GL_FLOAT,sizeof(float)*19,3,sizeof(Vertex));
     shader.enableAttributeArray("velocity");
+
+    QVector3D ambient = material.getAmbient();
+    QVector3D diffuse = material.getDiffuse();
+    QVector3D specular = material.getSpecular();
+    float shininess = material.getShininess();
+
+    shader.setUniformValue("material.amb",ambient);
+    shader.setUniformValue("material.dif",diffuse);
+    shader.setUniformValue("material.spec",specular);
+    shader.setUniformValue("material.shininess",shininess);
 
     glDrawElements(GL_TRIANGLES,indices.length(),GL_UNSIGNED_INT,(void*)0);
 }
@@ -271,31 +275,13 @@ Model* Model::createPlaneXZ(float width,float height,int xPatches,int zPatches)
     float patchZStep = height/zPatches;
 
     Model *model = new Model();
-
-    for(int z=0;z<zPatches-1;z++)
+    for(int z=0;z<zPatches;z++)
     {
-        for(int x=0;x<xPatches-1;x++)
+        for(int x=0;x<xPatches;x++)
         {
-            //Error in UV COORDS cast float
-            model->position.push_back(QVector3D(patchXStep*x-centerX,0,patchZStep*z-centerZ));
-            model->normal.push_back(QVector3D(0,1,0));
-            model->uv_coords.push_back(QVector2D(x/xPatches,z/zPatches));
-            model->position.push_back(QVector3D(patchXStep*(x+1)-centerX,0,patchZStep*z-centerZ));
-            model->normal.push_back(QVector3D(0,1,0));
-            model->uv_coords.push_back(QVector2D(x/xPatches,z/zPatches));
-            model->position.push_back(QVector3D(patchXStep*(x+1)-centerX,0,patchZStep*(z+1)-centerZ));
-            model->normal.push_back(QVector3D(0,1,0));
-            model->uv_coords.push_back(QVector2D(x/xPatches,z/zPatches));
-
-            model->position.push_back(QVector3D(patchXStep*(x+1)-centerX,0,patchZStep*(z+1)-centerZ));
-            model->normal.push_back(QVector3D(0,1,0));
-            model->uv_coords.push_back(QVector2D(x/xPatches,z/zPatches));
-            model->position.push_back(QVector3D(patchXStep*x-centerX,0,patchZStep*(z+1)-centerZ));
-            model->normal.push_back(QVector3D(0,1,0));
-            model->uv_coords.push_back(QVector2D(x/xPatches,z/zPatches));
-            model->position.push_back(QVector3D(patchXStep*x-centerX,0,patchZStep*z-centerZ));
-            model->normal.push_back(QVector3D(0,1,0));
-            model->uv_coords.push_back(QVector2D(x/xPatches,z/zPatches));
+            model->position.push_back(QVector3D(x*patchXStep-centerX,0.0,z*patchZStep-centerZ));
+            model->normal.push_back(QVector3D(0.0,1.0,0.0));
+            model->uv_coords.push_back(QVector2D(x/((float)width),z/((float)height)));
         }
     }
     for(int i=0;i<model->position.length();i++)
@@ -304,16 +290,36 @@ Model* Model::createPlaneXZ(float width,float height,int xPatches,int zPatches)
         v.setPos(model->position[i]);
         v.setNormal(model->normal[i]);
         v.setUv(model->uv_coords[i]);
-
-        v.setAmbient(QVector3D(0.2,0.2,0.2));
-        v.setDiffuse(QVector3D(0.4,0.4,0.4));
-        v.setSpecular(QVector3D(0.8,0.8,0.8));
-        v.setShininess(1.0);
         v.setMass(1.0f);
         v.setVelocity(QVector3D(0,0,0));
         model->vertices.push_back(v);
     }
+    for(int y=0;y<zPatches-1;y++)
+    {
+        for(int x=0;x<xPatches-1;x++)
+        {
+            Face f1,f2;
+            //Face 1
+            model->indices.push_back(y*xPatches+x);
+            f1.v1=y*xPatches+x;
+            model->indices.push_back(y*xPatches+(x+1));
+            f1.v2=y*xPatches+(x+1);
+            model->indices.push_back((y+1)*xPatches+x);
+            f1.v3=(y+1)*xPatches+x;
+            model->faces.push_back(f1);
+
+            //Face 2
+            model->indices.push_back((y+1)*xPatches+x);
+            f2.v1=(y+1)*xPatches+x;
+            model->indices.push_back(y*xPatches+(x+1));
+            f2.v2=y*xPatches+(x+1);
+            model->indices.push_back((y+1)*xPatches+(x+1));
+            f2.v3=(y+1)*xPatches+(x+1);
+            model->faces.push_back(f2);
+        }
+    }
     model->createFacemap();
+    //model->recalNormals();
     model->createVBO();
     model->createIndex();
     return model;
@@ -344,10 +350,6 @@ Model* Model::createPlaneXY(float width,float height,int xPatches,int yPatches)
         v.setNormal(model->normal[i]);
         v.setUv(model->uv_coords[i]);
 
-        v.setAmbient(QVector3D(0.2,0.2,0.2));
-        v.setDiffuse(QVector3D(0.4,0.4,0.4));
-        v.setSpecular(QVector3D(0.8,0.8,0.8));
-        v.setShininess(1.0);
         v.setMass(1.0f);
         v.setVelocity(QVector3D(0,0,0));
         model->vertices.push_back(v);
@@ -360,23 +362,24 @@ Model* Model::createPlaneXY(float width,float height,int xPatches,int yPatches)
             //Face 1
             model->indices.push_back(y*xPatches+x);
             f1.v1=y*xPatches+x;
-            model->indices.push_back((y+1)*xPatches+x);
-            f1.v2=(y+1)*xPatches+x;
             model->indices.push_back(y*xPatches+(x+1));
-            f1.v3=y*xPatches+(x+1);
+            f1.v2=y*xPatches+(x+1);
+            model->indices.push_back((y+1)*xPatches+x);
+            f1.v3=(y+1)*xPatches+x;
             model->faces.push_back(f1);
 
             //Face 2
             model->indices.push_back((y+1)*xPatches+x);
             f2.v1=(y+1)*xPatches+x;
-            model->indices.push_back((y+1)*xPatches+(x+1));
-            f2.v2=(y+1)*xPatches+(x+1);
             model->indices.push_back(y*xPatches+(x+1));
-            f2.v3=y*xPatches+(x+1);
+            f2.v2=y*xPatches+(x+1);
+            model->indices.push_back((y+1)*xPatches+(x+1));
+            f2.v3=(y+1)*xPatches+(x+1);
             model->faces.push_back(f2);
         }
     }
     model->createFacemap();
+    model->recalNormals();
     model->createVBO();
     model->createIndex();
     return model;
@@ -425,10 +428,6 @@ Model* Model::createPlaneYZ(float width,float height,int yPatches,int zPatches)
         v.setNormal(model->normal[i]);
         v.setUv(model->uv_coords[i]);
 
-        v.setAmbient(QVector3D(0.2,0.2,0.2));
-        v.setDiffuse(QVector3D(0.4,0.4,0.4));
-        v.setSpecular(QVector3D(0.8,0.8,0.8));
-        v.setShininess(1.0);
         v.setMass(1.0f);
         v.setVelocity(QVector3D(0,0,0));
         model->vertices.push_back(v);
@@ -464,10 +463,6 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
         v.setNormal(model->normal[i]);
         v.setUv(model->uv_coords[i]);
 
-        v.setAmbient(QVector3D(0.2,0.2,0.2));
-        v.setDiffuse(QVector3D(0.4,0.4,0.4));
-        v.setSpecular(QVector3D(0.8,0.8,0.8));
-        v.setShininess(1.0);
         v.setMass(1.0f);
         v.setVelocity(QVector3D(0,0,0));
         model->vertices.push_back(v);
@@ -576,10 +571,6 @@ Model* Model::createSphere(float radius,int stacks,int slices)
         v.setNormal(model->normal[i]);
         v.setUv(model->uv_coords[i]);
 
-        v.setAmbient(QVector3D(0.2,0.2,0.2));
-        v.setDiffuse(QVector3D(0.4,0.4,0.4));
-        v.setSpecular(QVector3D(0.8,0.8,0.8));
-        v.setShininess(1.0);
         v.setMass(1.0f);
         v.setVelocity(QVector3D(0,0,0));
         model->vertices.push_back(v);

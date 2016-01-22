@@ -8,6 +8,14 @@ struct LightSource
     vec3 spec;
 };
 
+struct Material
+{
+    vec3 amb;
+    vec3 dif;
+    vec3 spec;
+    float shininess;
+};
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 modelView;
@@ -17,16 +25,14 @@ uniform vec3 cameraPos;
 
 //Lighting Block
 uniform LightSource light[12];
+uniform Material material;
+
 uniform vec3 a;
 
 //Vertex input attribs
 in vec3 vertex;
 in vec3 normal;
 in vec2 uv;
-in vec3 ambient;
-in vec3 diffuse;
-in vec3 specular;
-in float shininess;
 in float mass;
 in float velocity;
 

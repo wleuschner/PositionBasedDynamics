@@ -27,42 +27,6 @@ void Vertex::setNormal(const QVector3D &value)
 {
     normal = value;
 }
-QVector3D Vertex::getAmbient() const
-{
-    return ambient;
-}
-
-void Vertex::setAmbient(const QVector3D &value)
-{
-    ambient = value;
-}
-QVector3D Vertex::getDiffuse() const
-{
-    return diffuse;
-}
-
-void Vertex::setDiffuse(const QVector3D &value)
-{
-    diffuse = value;
-}
-QVector3D Vertex::getSpecular() const
-{
-    return specular;
-}
-
-void Vertex::setSpecular(const QVector3D &value)
-{
-    specular = value;
-}
-float Vertex::getShininess() const
-{
-    return shininess;
-}
-
-void Vertex::setShininess(float value)
-{
-    shininess = value;
-}
 float Vertex::getMass() const
 {
     return mass;

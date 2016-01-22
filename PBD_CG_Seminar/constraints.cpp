@@ -89,7 +89,7 @@ void solveTetrahedralConstraint(QVector<Vertex>& vertices,QVector<Face>& facelis
     float sum = 0;
     for(int i=0;i<dp.size();i++)
     {
-        sum += dp[i].lengthSquared();
+        sum += vertices[i].getMass()*dp[i].lengthSquared();
     }
 
     float newVolume = 0.0;

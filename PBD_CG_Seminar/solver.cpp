@@ -8,7 +8,7 @@ Solver::Solver()
 
 void Solver::solve()
 {
-    double t = 1.0/60.0;
+    double t = 1/60.0;
 
     //Rigid Body Physics
     for(QList<Entity>::iterator e=rigidList.begin();e!=rigidList.end();e++)
@@ -31,7 +31,7 @@ void Solver::solve()
             double g = 9.81;
             double w = 1.0/i->getMass();
             QVector3D v = i->getVelocity();
-            v = v+t*w*QVector3D(0.0,0,0.0);
+            v = v+t*w*QVector3D(0.0,-g,0.0);
             i->setVelocity(v);
         }
 
@@ -62,14 +62,6 @@ void Solver::solve()
         float volume = m->getVolume();
         for(int i=0;i<20;i++)
         {
-            //Solve Collision Constraints
-            for(QVector<ConstraintParameters>::iterator i=constraints.begin();i!=constraints.end();i++)
-            {
-                QVector3D dp1(0,0,0);
-                QVector3D point = positions[i->index].getPos();
-                solveEnviromentConstraint(point,i->normal,i->distance,dp1);
-                positions[i->index].setPos(positions[i->index].getPos()+dp1);
-            }
             //Solve Distance Constraint
             float k_stretch = 1 - pow(1-0.2,1.0/solverLoops);
             for(QVector<unsigned int>::iterator j=indices.begin();std::distance(j,indices.end())>1;j++)
@@ -97,6 +89,14 @@ void Solver::solve()
                 QVector3D pos = positions[i].getPos();
                 QVector3D d = dp[i];
                 positions[i].setPos(pos+dp[i]);
+            }
+            //Solve Collision Constraints
+            for(QVector<ConstraintParameters>::iterator i=constraints.begin();i!=constraints.end();i++)
+            {
+                QVector3D dp1(0,0,0);
+                QVector3D point = positions[i->index].getPos();
+                solveEnviromentConstraint(point,i->normal,i->distance,dp1);
+                positions[i->index].setPos(positions[i->index].getPos()+dp1);
             }
         }
         //Set new Positions
@@ -160,7 +160,7 @@ void Solver::solve()
         for(int i=0;i<solverLoops;i++)
         {
             //Solve Distance Constraint
-            float k_stretch = 1 - pow(1-0.2,1.0/solverLoops);
+            float k_stretch = 1 - pow(1-0.1,1.0/solverLoops);
             for(QVector<unsigned int>::iterator j=indices.begin();std::distance(j,indices.end())>1;j++)
             {
                 QVector3D p1 = positions[*j].getPos();

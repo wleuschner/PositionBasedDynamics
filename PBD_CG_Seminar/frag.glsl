@@ -7,7 +7,17 @@ struct LightSource
     vec3 spec;
 };
 
+struct Material
+{
+    vec3 amb;
+    vec3 dif;
+    vec3 spec;
+    float shininess;
+};
+
 uniform LightSource light[12];
+uniform Material material;
+
 uniform mat4 view;
 uniform mat4 model;
 uniform mat4 modelView;
@@ -29,10 +39,9 @@ void main(void) {
     float spec = 0.0;
     if(dif>0.0)
     {
-        spec = pow(max(dot(reflected,vec3(0.0,0.0,-1.0)),0.0),32.0);
+        spec = pow(max(dot(reflected,vec3(0.0,0.0,-1.0)),0.0),material.shininess);
     }
-    float r=light[0].amb.r+light[0].dif.r*0.6*dif+light[0].spec.r*0.8*spec;
-    float g=light[0].amb.g+light[0].dif.g*0.6*dif+light[0].spec.g*0.8*spec;
-    float b=light[0].amb.b+light[0].dif.b*0.6*dif+light[0].spec.b*0.8*spec;
-    fragColor = vec4(r,g,b,1.0);
+
+    vec3 color = light[0].amb*material.amb+light[0].dif*material.dif*dif+light[0].spec*material.spec*spec;
+    fragColor = vec4(color,1.0);
 }

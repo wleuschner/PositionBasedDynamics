@@ -20,13 +20,13 @@ SOURCES += main.cpp\
     camera.cpp \
     constraintparameters.cpp \
     model.cpp \
-    mesh.cpp \
     solver.cpp \
     face.cpp \
     entity.cpp \
     spatialhash.cpp \
     abstractsolver.cpp \
-    constraints.cpp
+    constraints.cpp \
+    material.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -35,13 +35,13 @@ HEADERS  += mainwindow.h \
     camera.h \
     constraintparameters.h \
     model.h \
-    mesh.h \
     solver.h \
     face.h \
     entity.h \
     spatialhash.h \
     abstractsolver.h \
-    constraints.h
+    constraints.h \
+    material.h
 
 FORMS    += mainwindow.ui
 

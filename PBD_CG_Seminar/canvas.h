@@ -48,8 +48,11 @@ private:
 
     Camera camera;
     Light light;
+
     Entity mesh;
     Entity sphere;
+    Entity floor;
+
     QOpenGLVertexArrayObject vao;
     QOpenGLBuffer vertexBuffer;
     QOpenGLShaderProgram shader;

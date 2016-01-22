@@ -15,18 +15,6 @@ public:
     QVector3D getNormal() const;
     void setNormal(const QVector3D &value);
 
-    QVector3D getAmbient() const;
-    void setAmbient(const QVector3D &value);
-
-    QVector3D getDiffuse() const;
-    void setDiffuse(const QVector3D &value);
-
-    QVector3D getSpecular() const;
-    void setSpecular(const QVector3D &value);
-
-    float getShininess() const;
-    void setShininess(float value);
-
     float getMass() const;
     void setMass(float value);
 
@@ -41,12 +29,6 @@ private:
     QVector3D pos;
     QVector3D normal;
     QVector2D uv;
-
-    //Material Attributes
-    QVector3D ambient;
-    QVector3D diffuse;
-    QVector3D specular;
-    float shininess;
 
     //PBD Attributes
     float mass;

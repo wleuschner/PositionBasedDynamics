@@ -30,9 +30,10 @@ void Canvas::initializeGL()
     {
         qWarning()<<"Could not init GLEW";
     }
+    //glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glClearColor(0.0,0.0,0.0,1.0);
+    glClearColor(0.0,0.0,0.0,1.0);    
 
     if(!prepareShader("../PBD_CG_Seminar/vert.glsl","../PBD_CG_Seminar/frag.glsl"))
     {
@@ -43,21 +44,26 @@ void Canvas::initializeGL()
     vao.bind();
     shader.bind();
     //mesh = Entity(Model::createCylinder(2,4,4));
-    createSphere();
-    //createCylinder();
+    //createSphere();
+    createCylinder();
     //changeModel("/home/wladimir/Model/cube.obj");
     //mesh = Entity(Model::createPlaneXY(16,16,32,32));
+    floor = Entity(Model::createPlaneXZ(128,128,8,8));
     //mesh->load("/home/wladimir/Model/Duck/ducky.obj");
+    QMatrix4x4 floorM;
+    floorM.setToIdentity();
+    floorM.translate(0,-30,0);
+    floor.setMatrix(floorM);
     QMatrix4x4 model;
     model.setToIdentity();
     model.scale(1);
     mesh.setMatrix(model);
     //sphere.setMatrix(model);
     //mesh = Entity(Model::createPlaneXY(16,16,16,16));
-    //solver->addSoftBody(mesh);
-    solver->addBallonBody(mesh);
+    solver->addSoftBody(mesh);
+    //solver->addBallonBody(mesh);
 
-    QVector3D l_pos=QVector3D(20.0,0.0,0.0);
+    QVector3D l_pos=QVector3D(10.0,10.0,10.0);
     QVector3D l_amb=QVector3D(0.2,0.2,0.2);
     QVector3D l_dif=QVector3D(0.4,0.4,0.4);
     QVector3D l_spec = QVector3D(0.8,0.8,0.8);
@@ -93,6 +99,7 @@ void Canvas::paintGL()
     shader.setUniformValueArray("view",&view,1);
 
     vao.bind();
+    floor.draw(shader,view);
     mesh.draw(shader,view);
     //sphere.draw(shader);
 }

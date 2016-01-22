@@ -6,11 +6,13 @@
 #include<QOpenGLShader>
 #include<QOpenGLShaderProgram>
 #include<QOpenGLBuffer>
+#include<QOpenGLTexture>
 #include<QMatrix>
 #include<QVector>
 #include"vertex.h"
 #include"face.h"
 #include"spatialhash.h"
+#include"material.h"
 
 class Model
 {
@@ -22,6 +24,8 @@ public:
     void bind();
     void draw(QOpenGLShaderProgram& shader);
 
+    Material getMaterial() const;
+    void setMaterial(const Material &value);
     float getOriginalEdgeLength(int v1,int v2);
     QVector<Vertex>& getVertices();
     QVector<unsigned int>& getIndices();
@@ -40,6 +44,7 @@ public:
 
     void update();
     void recalNormals();
+
 private:
     float calcVolume();
     void createFacemap();
@@ -48,6 +53,7 @@ private:
 
     std::string name;
     float volume;
+    Material material;
     QVector<unsigned int> indices;
     QVector<Face> faces;
     QMap<int,QList<Face*>*> facemap;
