@@ -27,7 +27,7 @@ uniform vec3 cameraPos;
 uniform LightSource light[12];
 uniform Material material;
 
-uniform vec3 a;
+uniform vec3 position;
 
 //Vertex input attribs
 in vec3 vertex;
@@ -42,7 +42,7 @@ out vec3 frag_normal;
 
 void main(void) {
 
-    frag_normal = normal;
-    frag_position = vertex;
+    frag_normal = normalMatrix * normal;
+    frag_position = (modelView * vec4(vertex,1.0)).xyz;
     gl_Position = projection * modelView * vec4(vertex,1.0);
 }

@@ -11,6 +11,7 @@
 #include<QVector>
 #include"vertex.h"
 #include"face.h"
+#include"edge.h"
 #include"spatialhash.h"
 #include"material.h"
 
@@ -30,6 +31,7 @@ public:
     QVector<Vertex>& getVertices();
     QVector<unsigned int>& getIndices();
     QVector<Face>& getFaces();
+    QVector<Edge>& getEdges();
     const QMap<int,QList<Face*>*>& getFacemap();
     float getVolume();
 
@@ -56,6 +58,7 @@ private:
     Material material;
     QVector<unsigned int> indices;
     QVector<Face> faces;
+    QVector<Edge> edges;
     QMap<int,QList<Face*>*> facemap;
 
     QVector<QVector3D> position;

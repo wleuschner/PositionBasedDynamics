@@ -1,4 +1,5 @@
 #include "model.h"
+#include "edge.h"
 #include <fstream>
 #include <sstream>
 #include <regex>
@@ -67,6 +68,7 @@ bool Model::load(std::string path)
         }
         for(int i=0;i<mesh->mNumFaces;i++)
         {
+            Edge e1,e2,e3;
             Face f;
             f.v1=mesh->mFaces[i].mIndices[0];
             f.v2=mesh->mFaces[i].mIndices[1];
@@ -75,6 +77,12 @@ bool Model::load(std::string path)
             indices.push_back(f.v2);
             indices.push_back(f.v3);
             faces.push_back(f);
+            e1 = Edge(f.v1,f.v2);
+            e2 = Edge(f.v1,f.v3);
+            e3 = Edge(f.v2,f.v3);
+            edges.push_back(e1);
+            edges.push_back(e2);
+            edges.push_back(e3);
         }
     }
     createFacemap();
@@ -182,6 +190,11 @@ QVector<unsigned int>& Model::getIndices()
 QVector<Face>& Model::getFaces()
 {
     return faces;
+}
+
+QVector<Edge>& Model::getEdges()
+{
+    return edges;
 }
 
 const QMap<int,QList<Face*>*>& Model::getFacemap()
@@ -298,6 +311,7 @@ Model* Model::createPlaneXZ(float width,float height,int xPatches,int zPatches)
     {
         for(int x=0;x<xPatches-1;x++)
         {
+            Edge e1,e2,e3,e4,e5,e6;
             Face f1,f2;
             //Face 1
             model->indices.push_back(y*xPatches+x);
@@ -316,6 +330,19 @@ Model* Model::createPlaneXZ(float width,float height,int xPatches,int zPatches)
             model->indices.push_back((y+1)*xPatches+(x+1));
             f2.v3=(y+1)*xPatches+(x+1);
             model->faces.push_back(f2);
+
+            e1 = Edge(f1.v1,f1.v2);
+            e2 = Edge(f1.v1,f1.v3);
+            e3 = Edge(f1.v2,f1.v3);
+            e4 = Edge(f2.v1,f2.v2);
+            e5 = Edge(f2.v1,f2.v3);
+            e6 = Edge(f2.v2,f2.v3);
+            model->edges.push_back(e1);
+            model->edges.push_back(e2);
+            model->edges.push_back(e3);
+            model->edges.push_back(e4);
+            model->edges.push_back(e5);
+            model->edges.push_back(e6);
         }
     }
     model->createFacemap();
@@ -358,6 +385,7 @@ Model* Model::createPlaneXY(float width,float height,int xPatches,int yPatches)
     {
         for(int x=0;x<xPatches-1;x++)
         {
+            Edge e1,e2,e3,e4,e5,e6;
             Face f1,f2;
             //Face 1
             model->indices.push_back(y*xPatches+x);
@@ -376,6 +404,19 @@ Model* Model::createPlaneXY(float width,float height,int xPatches,int yPatches)
             model->indices.push_back((y+1)*xPatches+(x+1));
             f2.v3=(y+1)*xPatches+(x+1);
             model->faces.push_back(f2);
+
+            e1 = Edge(f1.v1,f1.v2);
+            e2 = Edge(f1.v1,f1.v3);
+            e3 = Edge(f1.v2,f1.v3);
+            e4 = Edge(f2.v1,f2.v2);
+            e5 = Edge(f2.v1,f2.v3);
+            e6 = Edge(f2.v2,f2.v3);
+            model->edges.push_back(e1);
+            model->edges.push_back(e2);
+            model->edges.push_back(e3);
+            model->edges.push_back(e4);
+            model->edges.push_back(e5);
+            model->edges.push_back(e6);
         }
     }
     model->createFacemap();
@@ -474,6 +515,7 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
         int x;
         for(x=0;x<slices-1;x++)
         {
+            Edge e1,e2,e3,e4,e5,e6;
             Face f1,f2;
             //Face 1
             model->indices.push_back(y*slices+x);
@@ -499,6 +541,19 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
             f2.v3=y*slices+(x+1);
             model->faces.push_back(f2);
 
+            e1 = Edge(f1.v1,f1.v2);
+            e2 = Edge(f1.v1,f1.v3);
+            e3 = Edge(f1.v2,f1.v3);
+            e4 = Edge(f2.v1,f2.v2);
+            e5 = Edge(f2.v1,f2.v3);
+            e6 = Edge(f2.v2,f2.v3);
+            model->edges.push_back(e1);
+            model->edges.push_back(e2);
+            model->edges.push_back(e3);
+            model->edges.push_back(e4);
+            model->edges.push_back(e5);
+            model->edges.push_back(e6);
+
             //Insert into Spatial Hash
             p1 = &model->vertices[f2.v1];
             p2 = &model->vertices[f2.v2];
@@ -506,6 +561,7 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
             model->shash->insert(p1,p2,p3);
         }
 
+        Edge e1,e2,e3,e4,e5,e6;
         Face f1,f2;
 
         //Face 1
@@ -531,6 +587,19 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
         model->indices.push_back(y*slices);
         f2.v3=y*slices;
         model->faces.push_back(f2);
+
+        e1 = Edge(f1.v1,f1.v2);
+        e2 = Edge(f1.v1,f1.v3);
+        e3 = Edge(f1.v2,f1.v3);
+        e4 = Edge(f2.v1,f2.v2);
+        e5 = Edge(f2.v1,f2.v3);
+        e6 = Edge(f2.v2,f2.v3);
+        model->edges.push_back(e1);
+        model->edges.push_back(e2);
+        model->edges.push_back(e3);
+        model->edges.push_back(e4);
+        model->edges.push_back(e5);
+        model->edges.push_back(e6);
 
         //Insert into Spatial Hash
         p1 = &model->vertices[f2.v1];

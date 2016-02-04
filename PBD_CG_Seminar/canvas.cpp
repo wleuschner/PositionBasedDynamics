@@ -14,7 +14,7 @@ Canvas::Canvas(QWidget *parent) :
     format.setProfile(QGLFormat::CoreProfile);
     format.setSampleBuffers(true);
     setFormat(format);
-    camera.move(QVector3D(0.0,0.0,100.0));
+    //camera.strafeZ(100.0);
     solver = new Solver();
 }
 
@@ -31,6 +31,7 @@ void Canvas::initializeGL()
         qWarning()<<"Could not init GLEW";
     }
     //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_CW);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glClearColor(0.0,0.0,0.0,1.0);    
@@ -46,7 +47,7 @@ void Canvas::initializeGL()
     //mesh = Entity(Model::createCylinder(2,4,4));
     //createSphere();
     createCylinder();
-    //changeModel("/home/wladimir/Model/cube.obj");
+    //changeModel("/home/wladimir/Model/Duck/ducky.obj");
     //mesh = Entity(Model::createPlaneXY(16,16,32,32));
     floor = Entity(Model::createPlaneXZ(128,128,8,8));
     //mesh->load("/home/wladimir/Model/Duck/ducky.obj");
@@ -63,7 +64,7 @@ void Canvas::initializeGL()
     solver->addSoftBody(mesh);
     //solver->addBallonBody(mesh);
 
-    QVector3D l_pos=QVector3D(10.0,10.0,10.0);
+    QVector3D l_pos=QVector3D(10.0,0.0,10.0);
     QVector3D l_amb=QVector3D(0.2,0.2,0.2);
     QVector3D l_dif=QVector3D(0.4,0.4,0.4);
     QVector3D l_spec = QVector3D(0.8,0.8,0.8);
@@ -91,16 +92,21 @@ void Canvas::resizeGL(int w, int h)
 
 void Canvas::paintGL()
 {
+    light.beginShadowmap();
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    light.endShadowmap();
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     view.setToIdentity();
     view=camera.lookAt();
+    QVector3D position = camera.getPosition();
 
     shader.bind();
+    shader.setUniformValue("position",position);
     shader.setUniformValueArray("view",&view,1);
 
     vao.bind();
-    floor.draw(shader,view);
     mesh.draw(shader,view);
+    floor.draw(shader,view);
     //sphere.draw(shader);
 }
 
@@ -109,22 +115,34 @@ void Canvas::keyPressEvent(QKeyEvent* event)
     switch(event->key())
     {
         case Qt::Key_W:
-            camera.move(QVector3D(0.0,0.0,-1.0));
+            camera.strafeZ(-1.0);
             break;
         case Qt::Key_S:
-            camera.move(QVector3D(0.0,0.0,1.0));
+            camera.strafeZ(1.0);
             break;
         case Qt::Key_A:
-            camera.move(QVector3D(-1.0,0.0,0.0));
+            camera.strafeX(-1.0);
             break;
         case Qt::Key_D:
-            camera.move(QVector3D(1.0,0.0,0.0));
+            camera.strafeX(1.0);
             break;
         case Qt::Key_PageUp:
-            camera.move(QVector3D(0.0,1.0,0.0));
+            camera.strafeY(1.0);
             break;
         case Qt::Key_PageDown:
-            camera.move(QVector3D(0.0,-1.0,0.0));
+            camera.strafeY(-1.0);
+            break;
+        case Qt::Key_Left:
+            camera.yaw(1.0);
+            break;
+        case Qt::Key_Right:
+            camera.yaw(-1.0);
+            break;
+        case Qt::Key_Up:
+            camera.roll(1.0);
+            break;
+        case Qt::Key_Down:
+            camera.roll(-1.0);
             break;
     }
 }
@@ -146,11 +164,13 @@ void Canvas::createCube()
 void Canvas::createCylinder()
 {
     mesh.release();
-    mesh = Entity(Model::createCylinder(2,32,32));
+    mesh = Entity(Model::createCylinder(2,16,16));
 }
 
 void Canvas::createSphere()
 {
+    QMatrix4x4 smat;
+    smat.translate(0,0,10.0);
     mesh.release();
     Model *m = new Model();
     //m->load("/home/wladimir/Model/cube.obj");

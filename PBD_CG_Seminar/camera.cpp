@@ -2,26 +2,64 @@
 
 Camera::Camera()
 {
-    pos=QVector3D(0.0,0.0,0.0);
-    up=QVector3D(0.0,1.0,0.0);
-    at=QVector3D(0.0,0.0,-1.0);
+    reset();
 }
 
 QMatrix4x4 Camera::lookAt()
 {
-    QMatrix4x4 ret;
-    ret.lookAt(pos,at,up);
+    QMatrix4x4 ret(s.x(),s.y(),s.z(),QVector3D::dotProduct(s,-pos),
+                   u.x(),u.y(),u.z(),QVector3D::dotProduct(u,-pos),
+                   v.x(),v.y(),v.z(),QVector3D::dotProduct(v,-pos),
+                   0,0,0,1);
     return ret;
 }
 
-void Camera::move(const QVector3D& a)
+void Camera::strafeX(float x)
 {
-    pos+=a;
-    at+=a;
+    pos+=x*s;
+}
+
+void Camera::strafeY(float y)
+{
+    pos+=y*u;
+}
+
+void Camera::strafeZ(float z)
+{
+
+    pos+=z*v;
+}
+
+void Camera::yaw(float angle)
+{
+    QMatrix4x4 rot;
+    rot.rotate(angle,u);
+    s = rot*s;
+    v = rot*v;
+}
+
+
+void Camera::roll(float angle)
+{
+    QMatrix4x4 rot;
+    rot.rotate(angle,s);
+    u = rot*u;
+    v = rot*v;
 }
 
 void Camera::reset()
 {
-    pos=QVector3D(0.0,0.0,0.0);
-    at=QVector3D(0.0,0.0,-1.0);
+    s = QVector3D(1.0,0.0,0.0);
+    u = QVector3D(0.0,1.0,0.0);
+    v = QVector3D(0.0,0.0,1.0);
+}
+
+QVector3D Camera::getPosition()
+{
+    return pos;
+}
+
+QVector3D Camera::getViewingNormal()
+{
+    return v;
 }

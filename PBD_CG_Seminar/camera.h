@@ -9,12 +9,25 @@ public:
     Camera();
     QMatrix4x4 lookAt();
 
-    void move(const QVector3D& a);
+    void strafeX(float x);
+    void strafeY(float y);
+    void strafeZ(float z);
+
+    void roll(float angle);
+    void pitch(float angle);
+    void yaw(float angle);
+
     void reset();
+
+    QVector3D getPosition();
+    QVector3D getViewingNormal();
 private:
+    QVector3D s;
+    QVector3D u;
+    QVector3D v;
+
+
     QVector3D pos;
-    QVector3D at;
-    QVector3D up;
 };
 
 #endif // CAMERA_H

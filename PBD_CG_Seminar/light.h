@@ -19,11 +19,17 @@ public:
     const QVector3D& getDiffuse();
     const QVector3D& getSpecular();
 
+    void beginShadowmap();
+    void endShadowmap();
+
 private:
     QVector3D pos;
     QVector3D ambient;
     QVector3D diffuse;
     QVector3D specular;
+
+    unsigned int framebuffer;
+    unsigned int shadowmap;
 };
 
 #endif // LIGHT_H

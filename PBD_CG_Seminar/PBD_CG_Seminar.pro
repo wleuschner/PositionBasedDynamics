@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     spatialhash.cpp \
     abstractsolver.cpp \
     constraints.cpp \
-    material.cpp
+    material.cpp \
+    edge.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
@@ -41,7 +42,8 @@ HEADERS  += mainwindow.h \
     spatialhash.h \
     abstractsolver.h \
     constraints.h \
-    material.h
+    material.h \
+    edge.h
 
 FORMS    += mainwindow.ui
 
@@ -49,7 +51,9 @@ LIBS     += -lGLEW -lassimp
 
 OTHER_FILES += \
     frag.glsl \
-    vert.glsl
+    vert.glsl \
+    shadow.vert \
+    shadow.frag
 
 CONFIG += c++11
 
