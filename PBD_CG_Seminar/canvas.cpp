@@ -30,8 +30,6 @@ void Canvas::initializeGL()
     {
         qWarning()<<"Could not init GLEW";
     }
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_CW);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
     glClearColor(0.0,0.0,0.0,1.0);    
@@ -44,13 +42,11 @@ void Canvas::initializeGL()
     vao.create();
     vao.bind();
     shader.bind();
-    //mesh = Entity(Model::createCylinder(2,4,4));
-    //createSphere();
-    createCylinder();
-    //changeModel("/home/wladimir/Model/Duck/ducky.obj");
-    //mesh = Entity(Model::createPlaneXY(16,16,32,32));
+
+    //Load Models and create Entitys
+    bulletModel = Model::createSphere(2,16,16);
+    mesh = Entity(Model::createPlaneXY(4,4,32,32));
     floor = Entity(Model::createPlaneXZ(128,128,8,8));
-    //mesh->load("/home/wladimir/Model/Duck/ducky.obj");
     QMatrix4x4 floorM;
     floorM.setToIdentity();
     floorM.translate(0,-30,0);
@@ -59,11 +55,10 @@ void Canvas::initializeGL()
     model.setToIdentity();
     model.scale(1);
     mesh.setMatrix(model);
-    //sphere.setMatrix(model);
-    //mesh = Entity(Model::createPlaneXY(16,16,16,16));
     solver->addSoftBody(mesh);
     //solver->addBallonBody(mesh);
 
+    //Init Light
     QVector3D l_pos=QVector3D(10.0,0.0,10.0);
     QVector3D l_amb=QVector3D(0.2,0.2,0.2);
     QVector3D l_dif=QVector3D(0.4,0.4,0.4);
@@ -87,7 +82,6 @@ void Canvas::resizeGL(int w, int h)
     projection.setToIdentity();
     projection.perspective(45.0f,width/height,0.1f,100.0f);
     shader.setUniformValueArray("projection",&projection,1);
-
 }
 
 void Canvas::paintGL()
@@ -95,6 +89,7 @@ void Canvas::paintGL()
     light.beginShadowmap();
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     light.endShadowmap();
+
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     view.setToIdentity();
     view=camera.lookAt();
@@ -105,15 +100,26 @@ void Canvas::paintGL()
     shader.setUniformValueArray("view",&view,1);
 
     vao.bind();
+    for(QList<Entity>::iterator i = bullets.begin();i!=bullets.end();i++)
+    {
+        i->draw(shader,view);
+    }
     mesh.draw(shader,view);
     floor.draw(shader,view);
-    //sphere.draw(shader);
 }
 
 void Canvas::keyPressEvent(QKeyEvent* event)
 {
     switch(event->key())
     {
+        case Qt::Key_E:
+            {
+                QVector3D pos = camera.getPosition();
+                QVector3D vel = -camera.getViewingNormal();
+                Entity e = Entity(bulletModel,QMatrix4x4(),pos,vel);
+                bullets.append(e);
+            }
+            break;
         case Qt::Key_W:
             camera.strafeZ(-1.0);
             break;
@@ -149,16 +155,41 @@ void Canvas::keyPressEvent(QKeyEvent* event)
 
 void Canvas::update()
 {
+    for(QList<Entity>::iterator i = bullets.begin();i!=bullets.end();i++)
+    {
+        i->update();
+        QVector3D pos = i->getPosition();
+        if(pos.x()>128||pos.x()<-128||pos.y()>128||pos.y()<-128||pos.z()>128||pos.z()<-128)
+        {
+            i = bullets.erase(i);
+            if(i==bullets.end())
+            {
+                break;
+            }
+        }
+    }
     solver->solve();
     updateGL();
 }
 
-void Canvas::changeModel(QString file)
+void Canvas::changeSolverLoops(int num)
 {
+    solver->setSolverLoops(num);
 }
 
-void Canvas::createCube()
+void Canvas::changeStretchStiffness(double val)
 {
+    solver->setStretchStiffness(val);
+}
+
+void Canvas::changeCompressStiffness(double val)
+{
+    solver->setCompressStiffness(val);
+}
+
+void Canvas::changeBendingStifness(double val)
+{
+    solver->setBendStiffness(val);
 }
 
 void Canvas::createCylinder()
@@ -172,20 +203,19 @@ void Canvas::createSphere()
     QMatrix4x4 smat;
     smat.translate(0,0,10.0);
     mesh.release();
-    Model *m = new Model();
+    //Model *m = new Model();
+
     //m->load("/home/wladimir/Model/cube.obj");
-    m->load("/home/wladimir/Model/sphere/sphere.obj");
+
+    //m->load("/home/wladimir/Model/sphere/sphere.obj");
+
     //m->load("/home/wladimir/Model/Duck/DUCK.3DS");
-    mesh = Entity(m);
+
+    //mesh = Entity(m);
 
     //mesh.release();
-    //mesh = Entity(Model::createSphere(2,64,64));
+    mesh = Entity(Model::createSphere(4,64,64));
 }
-
-void Canvas::createTorus()
-{
-}
-
 
 bool Canvas::prepareShader(const QString& vertexShaderPath,const QString& fragmentShaderPath)
 {

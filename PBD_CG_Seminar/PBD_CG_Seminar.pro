@@ -15,35 +15,41 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     canvas.cpp \
-    light.cpp \
+    graphics/light.cpp \
     vertex.cpp \
-    camera.cpp \
-    constraintparameters.cpp \
-    model.cpp \
-    solver.cpp \
-    face.cpp \
-    entity.cpp \
-    spatialhash.cpp \
-    abstractsolver.cpp \
-    constraints.cpp \
-    material.cpp \
-    edge.cpp
+    graphics/camera.cpp \
+    framework/constraintparameters.cpp \
+    graphics/model.cpp \
+    solvers/solver.cpp \
+    geometry/face.cpp \
+    graphics/entity.cpp \
+    structs/spatialhash.cpp \
+    framework/abstractsolver.cpp \
+    framework/constraints.cpp \
+    graphics/material.cpp \
+    geometry/edge.cpp \
+    solvers/jacobisolver.cpp \
+    scene.cpp \
+    abstractscene.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
-    light.h \
+    graphics/light.h \
     vertex.h \
-    camera.h \
-    constraintparameters.h \
-    model.h \
-    solver.h \
-    face.h \
-    entity.h \
-    spatialhash.h \
-    abstractsolver.h \
-    constraints.h \
-    material.h \
-    edge.h
+    graphics/camera.h \
+    framework/constraintparameters.h \
+    graphics/model.h \
+    solvers/solver.h \
+    geometry/face.h \
+    graphics/entity.h \
+    structs/spatialhash.h \
+    framework/abstractsolver.h \
+    framework/constraints.h \
+    graphics/material.h \
+    geometry/edge.h \
+    solvers/jacobisolver.h \
+    scene.h \
+    abstractscene.h
 
 FORMS    += mainwindow.ui
 

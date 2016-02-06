@@ -29,6 +29,7 @@
       <property name="focusPolicy">
        <enum>Qt::StrongFocus</enum>
       </property>
+      <zorder></zorder>
      </widget>
     </item>
     <item>
@@ -36,6 +37,54 @@
       <property name="sizeConstraint">
        <enum>QLayout::SetFixedSize</enum>
       </property>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Stretch Stiffness:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spinBoxStretch">
+          <property name="maximum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.500000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="labelCompress">
+          <property name="text">
+           <string>Compress Stiffness:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spinBoxCompress">
+          <property name="maximum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.500000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
@@ -46,7 +95,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
+         <widget class="QDoubleSpinBox" name="spinBoxBend"/>
         </item>
        </layout>
       </item>
@@ -60,7 +109,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox">
+         <widget class="QComboBox" name="comboBoxSolver">
           <item>
            <property name="text">
             <string>Gauss-Seidel</string>
@@ -85,7 +134,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QSpinBox" name="spinBox"/>
+         <widget class="QSpinBox" name="iterationSpinBox">
+          <property name="maximum">
+           <number>1000</number>
+          </property>
+          <property name="value">
+           <number>20</number>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -119,26 +175,6 @@
     <property name="title">
      <string>File</string>
     </property>
-    <widget class="QMenu" name="menuChoose_Primitive">
-     <property name="title">
-      <string>Choose Object</string>
-     </property>
-     <addaction name="actionCube"/>
-     <addaction name="actionCylinder"/>
-     <addaction name="actionSphere"/>
-     <addaction name="actionTorus"/>
-     <addaction name="action_Open_Model"/>
-    </widget>
-    <widget class="QMenu" name="menuChoose_Scene_2">
-     <property name="title">
-      <string>Choose Scene</string>
-     </property>
-     <addaction name="actionScene_1"/>
-     <addaction name="actionScene_2"/>
-     <addaction name="actionScene_3"/>
-    </widget>
-    <addaction name="menuChoose_Scene_2"/>
-    <addaction name="menuChoose_Primitive"/>
     <addaction name="action_Exit"/>
    </widget>
    <addaction name="menuFile"/>

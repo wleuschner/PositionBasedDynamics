@@ -30,28 +30,29 @@ signals:
 
 public slots:
     void update();
-    void changeModel(QString file);
-    void createCube();
+    void changeSolverLoops(int num);
+    void changeStretchStiffness(double val);
+    void changeCompressStiffness(double val);
+    void changeBendingStifness(double val);
     void createCylinder();
     void createSphere();
-    void createTorus();
 
 private:
     void uploadLight(Light& light,int index);
 
-    void solveSeidel();
-    void solveJacobi();
     bool prepareShader(const QString& vertexShaderPath,const QString& fragmentShaderPath);
 
-    QGLFunctions* extFunctions;
     QTimer updateTimer;
 
     Camera camera;
     Light light;
 
+    Model* bulletModel;
+
     Entity mesh;
-    Entity sphere;
     Entity floor;
+
+    QList<Entity> bullets;
 
     QOpenGLVertexArrayObject vao;
     QOpenGLBuffer vertexBuffer;
