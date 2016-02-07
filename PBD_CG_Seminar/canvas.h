@@ -8,10 +8,11 @@
 #include <QOpenGLVertexArrayObject>
 #include <QGLShaderProgram>
 
-#include "camera.h"
-#include "light.h"
-#include "entity.h"
-#include "abstractsolver.h"
+#include "graphics/camera.h"
+#include "graphics/light.h"
+#include "graphics/entity.h"
+#include "framework/abstractsolver.h"
+#include "abstractscene.h"
 
 class Canvas : public QGLWidget
 {
@@ -31,39 +32,20 @@ signals:
 public slots:
     void update();
     void changeSolverLoops(int num);
+    void changePressure(double val);
     void changeStretchStiffness(double val);
     void changeCompressStiffness(double val);
     void changeBendingStifness(double val);
-    void createCylinder();
-    void createSphere();
 
+    void scene1Triggered();
+    void scene2Triggered();
+    void scene3Triggered();
 private:
-    void uploadLight(Light& light,int index);
-
-    bool prepareShader(const QString& vertexShaderPath,const QString& fragmentShaderPath);
+    bool initCL();
 
     QTimer updateTimer;
 
-    Camera camera;
-    Light light;
-
-    Model* bulletModel;
-
-    Entity mesh;
-    Entity floor;
-
-    QList<Entity> bullets;
-
-    QOpenGLVertexArrayObject vao;
-    QOpenGLBuffer vertexBuffer;
-    QOpenGLShaderProgram shader;
-
-    QVector3D pos;
-
-    QMatrix4x4 projection;
-    QMatrix4x4 view;
-    QMatrix4x4 model;
-
+    AbstractScene *scene;
     AbstractSolver* solver;
 };
 

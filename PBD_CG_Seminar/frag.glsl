@@ -24,6 +24,7 @@ uniform mat4 modelView;
 uniform mat3 normalMatrix;
 
 uniform vec3 position;
+uniform bool doubleFaced;
 
 in vec3 frag_position;
 in vec3 frag_normal;
@@ -33,8 +34,16 @@ out vec4 fragColor;
 void main(void) {
     vec3 normal = normalize(frag_normal);
     vec3 pos = frag_position;
-
     vec3 ldir = normalize(vec3((view*vec4(light[0].pos,1.0)).xyz) - pos);
+
+    if(doubleFaced)
+    {
+        if(dot(ldir,normal)<0)
+        {
+            normal = -normal;
+        }
+    }
+
     vec3 reflected = reflect(-ldir,frag_normal);
     vec3 vdir = normalize(-pos);
 
@@ -43,7 +52,7 @@ void main(void) {
     if(dif>0.0)
     {
         float specAngle = max(dot(reflected,vdir),0.0);
-        spec = pow(specAngle,8.0);
+        spec = pow(specAngle,material.shininess);
     }
     vec3 color = light[0].amb*material.amb+light[0].dif*material.dif*dif+light[0].spec*material.spec*spec;
     fragColor = vec4(color,1.0);

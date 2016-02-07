@@ -16,7 +16,7 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     canvas.cpp \
     graphics/light.cpp \
-    vertex.cpp \
+    geometry/vertex.cpp \
     graphics/camera.cpp \
     framework/constraintparameters.cpp \
     graphics/model.cpp \
@@ -29,13 +29,16 @@ SOURCES += main.cpp\
     graphics/material.cpp \
     geometry/edge.cpp \
     solvers/jacobisolver.cpp \
-    scene.cpp \
-    abstractscene.cpp
+    scenes/scene.cpp \
+    abstractscene.cpp \
+    scenes/scene2.cpp \
+    scenes/scene3.cpp \
+    collisionsphereconstraint.cpp
 
 HEADERS  += mainwindow.h \
     canvas.h \
     graphics/light.h \
-    vertex.h \
+    geometry/vertex.h \
     graphics/camera.h \
     framework/constraintparameters.h \
     graphics/model.h \
@@ -48,8 +51,11 @@ HEADERS  += mainwindow.h \
     graphics/material.h \
     geometry/edge.h \
     solvers/jacobisolver.h \
-    scene.h \
-    abstractscene.h
+    scenes/scene.h \
+    abstractscene.h \
+    scenes/scene2.h \
+    scenes/scene3.h \
+    collisionsphereconstraint.h
 
 FORMS    += mainwindow.ui
 

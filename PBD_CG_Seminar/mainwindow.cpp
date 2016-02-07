@@ -8,10 +8,15 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->iterationSpinBox,SIGNAL(valueChanged(int)),ui->widget,SLOT(changeSolverLoops(int)));
+    connect(ui->spinBoxPressure,SIGNAL(valueChanged(double)),ui->widget,SLOT(changePressure(double)));
     connect(ui->spinBoxStretch,SIGNAL(valueChanged(double)),ui->widget,SLOT(changeStretchStiffness(double)));
     connect(ui->spinBoxCompress,SIGNAL(valueChanged(double)),ui->widget,SLOT(changeCompressStiffness(double)));
     connect(ui->spinBoxBend,SIGNAL(valueChanged(double)),ui->widget,SLOT(changeBendStiffness(double)));
     connect(ui->resetButton,SIGNAL(clicked()),this,SLOT(reset()));
+
+    connect(ui->actionScene1,SIGNAL(triggered()),ui->widget,SLOT(scene1Triggered()));
+    connect(ui->actionScene2,SIGNAL(triggered()),ui->widget,SLOT(scene2Triggered()));
+    connect(ui->actionScene3,SIGNAL(triggered()),ui->widget,SLOT(scene3Triggered()));
     reset();
 }
 
