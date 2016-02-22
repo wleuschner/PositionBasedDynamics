@@ -13,16 +13,19 @@ void Solver::solve(QList<Entity>* colObjs)
     float k_stretch = 1 - pow(1-AbstractSolver::stretch_k,1.0/AbstractSolver::solverLoops);
     float k_compress = 1 - pow(1-AbstractSolver::compress_k,1.0/AbstractSolver::solverLoops);
 
-    for(QList<Entity>::iterator i = colObjs->begin();i!=colObjs->end();i++)
+    if(colObjs!=NULL)
     {
-        i->update();
-        QVector3D pos = i->getPosition();
-        if(pos.x()>128||pos.x()<-128||pos.y()>128||pos.y()<-128||pos.z()>128||pos.z()<-128)
+        for(QList<Entity>::iterator i = colObjs->begin();i!=colObjs->end();i++)
         {
-            i = colObjs->erase(i);
-            if(i==colObjs->end())
+            i->update();
+            QVector3D pos = i->getPosition();
+            if(pos.x()>128||pos.x()<-128||pos.y()>128||pos.y()<-128||pos.z()>128||pos.z()<-128)
             {
-                break;
+                i = colObjs->erase(i);
+                if(i==colObjs->end())
+                {
+                    break;
+                }
             }
         }
     }
@@ -145,6 +148,8 @@ void Solver::solve(QList<Entity>* colObjs)
         QVector<Edge>& edges = m->getEdges();
         QVector<Vertex> positions = vertices;
         const QMap<int,QList<Face*>*> facemap = m->getFacemap();
+        const QMap<Edge*,QList<Face*>*> adjacent = m->getAdjacentmap();
+
 
         //External forces
         for(QVector<Vertex>::iterator i=positions.begin();i!=positions.end();i++)
@@ -225,38 +230,15 @@ void Solver::solve(QList<Entity>* colObjs)
                 QVector3D x1 = vertices[j->v1].getPos();
                 QVector3D x2 = vertices[j->v2].getPos();
                 QVector3D dp1(0,0,0),dp2(0,0,0);
+                float origLength = m->getOriginalEdgeLength(j->v1,j->v2);
 
-
-                solveDistanceConstraint(p1,p2,w1,w2,m->getOriginalEdgeLength(j->v1,j->v2),k_compress,k_stretch,dp1,dp2);
+                solveDistanceConstraint(p1,p2,w1,w2,origLength,k_compress,k_stretch,dp1,dp2);
                 p1 += dp1;
                 p2 += dp2;
 
                 positions[j->v1].setPos(p1);
                 positions[j->v2].setPos(p2);
             }
-
-            //Sove Bending Constraint
-            /*for(QVector<unsigned int>::iterator j=indices.begin();std::distance(j,indices.end())>4;j++)
-            {
-                QList<Face*>* facemap.value(i);
-                QVector3D p1 = positions[*j].getPos();
-                QVector3D p2 = positions[*(j+1)].getPos();
-                QVector3D p3 = positions[*(j+2)].getPos();
-                QVector3D p4 = positions[*(j+3)].getPos();
-                QVector3D dp1(0,0,0),dp2(0,0,0),dp3(0,0,0),dp4(0,0,0);
-
-
-                solveBendConstraint(p1,p2,p3,p4,0.5235987755983,dp1,dp2,dp3,dp4);
-                p1 += dp1;
-                p2 += dp2;
-                p3 += dp3;
-                p4 += dp4;
-
-                positions[*j].setPos(p1);
-                positions[*(j+1)].setPos(p2);
-                positions[*(j+2)].setPos(p3);
-                positions[*(j+3)].setPos(p4);
-            }*/
 
             //Solve Collision Constraints
             for(QVector<ConstraintParameters>::iterator i=constraints.begin();i!=constraints.end();i++)

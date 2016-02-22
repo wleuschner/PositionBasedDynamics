@@ -33,6 +33,7 @@ public:
     QVector<Face>& getFaces();
     QVector<Edge>& getEdges();
     const QMap<int,QList<Face*>*>& getFacemap();
+    const QMap<Edge*,QList<Face*>*>& getAdjacentmap();
     float getVolume();
 
 
@@ -50,6 +51,7 @@ public:
 private:
     float calcVolume();
     void createFacemap();
+    void createAdjacentMap();
     bool createVBO();
     bool createIndex();
 
@@ -61,6 +63,7 @@ private:
     QVector<Face> faces;
     QVector<Edge> edges;
     QMap<int,QList<Face*>*> facemap;
+    QMap<Edge*,QList<Face*>*> adjacent;
 
     QVector<QVector3D> position;
     QVector<QVector3D> normal;

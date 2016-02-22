@@ -3,8 +3,12 @@
 Scene2::Scene2(AbstractSolver* solver) : AbstractScene(solver)
 {
     //Load Models and create Entitys
+    Material mmat = Material(QVector3D(0.0,0.0,0.0),QVector3D(0.5,0.0,0.0),QVector3D(0.7,0.6,0.6),256);
+    Material fmat = Material(QVector3D(0.24725,0.1995,0.0745),QVector3D(0.75164,0.60648,0.22648),QVector3D(0.628281,0.555802,0.366065),128);
     mesh = new Entity(Model::createCylinder(2,32,32));
+    mesh->getModel()->setMaterial(mmat);
     floor = new Entity(Model::createPlaneXZ(128,128,8,8),QMatrix4x4(),QVector3D(0,-30,0),QVector3D(0,0,0));
+    floor->getModel()->setMaterial(fmat);
     solver->addSoftBody(mesh);
     //solver->addBallonBody(mesh);
 

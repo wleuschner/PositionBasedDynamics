@@ -1,6 +1,7 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 #include<QVector3D>
+#include<QList>
 
 class Light
 {
@@ -22,7 +23,14 @@ public:
     void beginShadowmap();
     void endShadowmap();
 
+    static void addLight(Light*);
+    static void removeLight(Light*);
+    static void getLight(int index);
+    static void clearLights();
+    static QList<Light*>& getLights();
+
 private:
+    static QList<Light*> lights;
     QVector3D pos;
     QVector3D ambient;
     QVector3D diffuse;

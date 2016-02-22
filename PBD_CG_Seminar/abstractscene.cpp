@@ -55,6 +55,34 @@ void AbstractScene::uploadLight(Light& light,int index)
     shader->setUniformValue(specular_string.c_str(),specular);
 }
 
+void AbstractScene::uploadLights(QList<Light*>& lights)
+{
+    int index=0;
+
+    std::string numlights_string = QString("numLights").toStdString();
+    shader->setUniformValue(numlights_string.c_str(),lights.size());
+
+    for(QList<Light*>::iterator i = lights.begin();i!=lights.end();i++)
+    {
+        QVector3D pos = (*i)->getPosition();
+        QVector3D ambient = (*i)->getAmbient();
+        QVector3D diffuse = (*i)->getDiffuse();
+        QVector3D specular = (*i)->getSpecular();
+
+        std::string pos_string = QString("light[%0].pos").arg(index).toStdString();
+        std::string ambient_string = QString("light[%0].amb").arg(index).toStdString();
+        std::string diffuse_string = QString("light[%0].dif").arg(index).toStdString();
+        std::string specular_string = QString("light[%0].spec").arg(index).toStdString();
+
+        shader->setUniformValue(pos_string.c_str(),pos);
+        shader->setUniformValue(ambient_string.c_str(),ambient);
+        shader->setUniformValue(diffuse_string.c_str(),diffuse);
+        shader->setUniformValue(specular_string.c_str(),specular);
+        index++;
+    }
+}
+
+
 bool AbstractScene::prepareShader(QOpenGLShaderProgram* program,const QString& vertexShaderPath,const QString& fragmentShaderPath)
 {
     bool result = program->addShaderFromSourceFile(QOpenGLShader::Vertex,vertexShaderPath);

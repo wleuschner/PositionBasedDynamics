@@ -14,7 +14,7 @@ Edge::Edge(int v1, int v2)
 
 bool operator==(const Edge& a,const Edge& b)
 {
-    if(a.v1==b.v1 && a.v2==b.v2)
+    if((a.v1==b.v1 && a.v2==b.v2) || (a.v2==b.v1 && a.v1==b.v2))
     {
         return true;
     }

@@ -1,6 +1,8 @@
 #include "light.h"
 #include <GL/glew.h>
 
+QList<Light*> Light::lights;
+
 Light::Light()
 {
     this->pos=QVector3D(0.0,0.0,0.0);
@@ -90,4 +92,33 @@ void Light::endShadowmap()
     glDrawBuffer(GL_FRONT_AND_BACK);
     glBindTexture(GL_TEXTURE_2D,0);
     glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+}
+
+void Light::addLight(Light* light)
+{
+    lights.append(light);
+}
+
+void Light::removeLight(Light* light)
+{
+    lights.removeOne(light);
+}
+
+void Light::getLight(int index)
+{
+    lights.removeAt(index);
+}
+
+void Light::clearLights()
+{
+    for(QList<Light*>::iterator i = lights.begin();i!=lights.end();i++)
+    {
+        delete *i;
+        lights.erase(i);
+    }
+}
+
+QList<Light*>& Light::getLights()
+{
+    return lights;
 }

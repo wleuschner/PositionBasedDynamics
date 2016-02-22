@@ -20,6 +20,7 @@ public:
 
 protected:
     void uploadLight(Light& light,int index);
+    void uploadLights(QList<Light*> &lights);
     bool prepareShader(QOpenGLShaderProgram* program,const QString& vertexShaderPath,const QString& fragmentShaderPath);
 
     QMatrix4x4 projection;

@@ -16,6 +16,7 @@ struct Material
 };
 
 uniform LightSource light[12];
+uniform int numLights;
 uniform Material material;
 
 uniform mat4 view;
@@ -34,26 +35,30 @@ out vec4 fragColor;
 void main(void) {
     vec3 normal = normalize(frag_normal);
     vec3 pos = frag_position;
-    vec3 ldir = normalize(vec3((view*vec4(light[0].pos,1.0)).xyz) - pos);
-
-    if(doubleFaced)
+    vec3 color;
+    for(int i=0;i<numLights;i++)
     {
-        if(dot(ldir,normal)<0)
+        vec3 ldir = normalize(vec3((view*vec4(light[i].pos,1.0)).xyz) - pos);
+
+        if(doubleFaced)
         {
-            normal = -normal;
+            if(dot(ldir,normal)<0)
+            {
+                normal = -normal;
+            }
         }
-    }
 
-    vec3 reflected = reflect(-ldir,frag_normal);
-    vec3 vdir = normalize(-pos);
+        vec3 reflected = reflect(-ldir,frag_normal);
+        vec3 vdir = normalize(-pos);
 
-    float dif = max(dot(ldir,normal),0.0);
-    float spec = 0.0;
-    if(dif>0.0)
-    {
-        float specAngle = max(dot(reflected,vdir),0.0);
-        spec = pow(specAngle,material.shininess);
+        float dif = max(dot(ldir,normal),0.0);
+        float spec = 0.0;
+        if(dif>0.0)
+        {
+            float specAngle = max(dot(reflected,vdir),0.0);
+            spec = pow(specAngle,material.shininess);
+        }
+        color += light[i].amb*material.amb+light[i].dif*material.dif*dif+light[i].spec*material.spec*spec;
     }
-    vec3 color = light[0].amb*material.amb+light[0].dif*material.dif*dif+light[0].spec*material.spec*spec;
     fragColor = vec4(color,1.0);
 }

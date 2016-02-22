@@ -28,7 +28,7 @@ Model::~Model()
 bool Model::load(std::string path)
 {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path,aiProcess_Triangulate|aiProcess_PreTransformVertices|aiProcess_JoinIdenticalVertices|aiProcess_GenNormals);
+    const aiScene* scene = importer.ReadFile(path,aiProcessPreset_TargetRealtime_Quality);
     for(unsigned int j=0;j</*scene->mNumMeshes*/1;j++)
     {
         const aiMesh* mesh = scene->mMeshes[j];
@@ -46,6 +46,7 @@ bool Model::load(std::string path)
         mat->Get(AI_MATKEY_COLOR_SPECULAR,mat_specular);
         mat->Get(AI_MATKEY_SHININESS,mat_shininess);
         position.reserve(mesh->mNumVertices);
+        qDebug()<<"NUMVERTS"<<mesh->mNumVertices;
         for(unsigned int i=0;i<mesh->mNumVertices;i++)
         {
             aiVector3D v = mesh->mVertices[i];
@@ -98,6 +99,7 @@ bool Model::load(std::string path)
         }
     }
     createFacemap();
+    createAdjacentMap();
     volume = calcVolume();
     qDebug()<<volume;
     recalNormals();
@@ -117,6 +119,7 @@ bool Model::release()
     uv_coords.clear();
     normal.clear();
     facemap.clear();
+    adjacent.clear();
     edges.clear();
     faces.clear();
     return true;
@@ -147,6 +150,42 @@ float Model::calcVolume()
         volume += QVector3D::dotProduct(v3,QVector3D::crossProduct(v1,v2));
     }
     return volume;
+}
+
+void Model::createAdjacentMap()
+{
+    for(int e=0;e<edges.size();e++)
+    {
+        Edge ed = edges[e];
+        for(int f=0;f<faces.size();f++)
+        {
+            Face fa = faces[f];
+            if((ed.v1 == fa.v1 && ed.v2 == fa.v2) || (ed.v1 == fa.v2 && ed.v2 == fa.v1))
+            {
+                if(!adjacent.contains(&edges[e]))
+                {
+                    adjacent.insert(&edges[e],new QList<Face*>());
+                }
+                adjacent.value(&edges[e])->append(&faces[f]);
+            }
+            else if((ed.v1 == fa.v1 && ed.v2 == fa.v3) || (ed.v1 == fa.v3 && ed.v2 == fa.v1))
+            {
+                if(!adjacent.contains(&edges[e]))
+                {
+                    adjacent.insert(&edges[e],new QList<Face*>());
+                }
+                adjacent.value(&edges[e])->append(&faces[f]);
+            }
+            else if((ed.v1 == fa.v2 && ed.v2 == fa.v3) || (ed.v1 == fa.v3 && ed.v2 == fa.v2))
+            {
+                if(!adjacent.contains(&edges[e]))
+                {
+                    adjacent.insert(&edges[e],new QList<Face*>());
+                }
+                adjacent.value(&edges[e])->append(&faces[f]);
+            }
+        }
+    }
 }
 
 void Model::createFacemap()
@@ -222,6 +261,11 @@ QVector<Edge>& Model::getEdges()
 const QMap<int,QList<Face*>*>& Model::getFacemap()
 {
     return facemap;
+}
+
+const QMap<Edge*,QList<Face*>*>& Model::getAdjacentmap()
+{
+    return adjacent;
 }
 
 float Model::getVolume()
@@ -394,6 +438,7 @@ Model* Model::createPlaneXZ(float width,float height,int xPatches,int zPatches)
     }
     model->doubleFaced = true;
     model->createFacemap();
+    model->createAdjacentMap();
     //model->recalNormals();
     model->createVBO();
     model->createIndex();
@@ -490,10 +535,12 @@ Model* Model::createPlaneXY(float width,float height,int xPatches,int yPatches)
             {
                 model->edges.push_back(e6);
             }
+
         }
     }
     model->doubleFaced=true;
     model->createFacemap();
+    model->createAdjacentMap();
     model->recalNormals();
     model->createVBO();
     model->createIndex();
@@ -549,6 +596,7 @@ Model* Model::createPlaneYZ(float width,float height,int yPatches,int zPatches)
     }
     model->doubleFaced=true;
     model->createFacemap();
+    model->createAdjacentMap();
     model->createVBO();
     model->createIndex();
     return model;
@@ -559,13 +607,13 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
     Model *model = new Model();
     float angle_inc = PI2/slices;
     float r = radius;
-    for(int y=-stacks/2;y<stacks/2;y++)
+    float h = 10.0/stacks;
+    for(int y=0;y<stacks;y++)
     {
         float angle = 0.0;
         for(int x=0;x<slices;x++,angle+=angle_inc)
         {
-            fmax(r,y);
-            model->position.push_back(QVector3D(radius*cosf(angle),y,radius*sinf(angle)));
+            model->position.push_back(QVector3D(radius*cosf(angle),h*y-stacks/2,radius*sinf(angle)));
             model->normal.push_back(QVector3D(cosf(angle),0.0,sinf(angle)));
             model->uv_coords.push_back(QVector2D(x/((float)slices),y/((float)stacks)));
         }
@@ -720,6 +768,7 @@ Model* Model::createCylinder(float radius,int stacks,int slices)
     }
     model->doubleFaced=true;
     model->createFacemap();
+    model->createAdjacentMap();
     model->volume = model->calcVolume();
     model->createVBO();
     model->createIndex();
@@ -865,6 +914,7 @@ Model* Model::createSphere(float radius,int stacks,int slices)
         }
     }
     model->createFacemap();
+    model->createAdjacentMap();
     model->volume = model->calcVolume();
     model->recalNormals();
     model->createVBO();
