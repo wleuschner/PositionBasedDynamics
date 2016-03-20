@@ -1,6 +1,6 @@
 <!doctype html> <html class="no-js"> <head> <meta charset="utf-8"> 
 
-<title>Perfect Laplacians for Polygon Meshes</title> 
+<title>Position Based Dynamics - Realtime Physics Approximation</title> 
 
 <meta name="description" content=""> <meta name="viewport" content="width=device-width"> <!-- Place favicon.ico and apple-touch-icon.png in the root directory --> <link href="http://fonts.googleapis.com/css?family=Raleway:300,400,600" rel="stylesheet" type="text/css"> 
 <style type="text/css">
@@ -23,116 +23,257 @@ html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:1
                     <a class="navbar-link" href="#intro">Intro</a>
                 </li>
                 <li class="navbar-item">
+                    <a class="navbar-link" href="#physics">Physics of Motion</a>
+                </li>
+                <li class="navbar-item">
+                    <a class="navbar-link" href="#pbd">Position Based Dynamics</a>
+                </li>
+                <li class="navbar-item">
+                    <a class="navbar-link" href="#specconstr">Specific Constraints</a>
+                </li>
+                <li class="navbar-item">
+                    <a class="navbar-link" href="#impl">Implementation</a>
+                </li>
+                <li class="navbar-item">
                     <a class="navbar-link" href="#results">Results</a>
-                </li>
-                <li class="navbar-item">
-                    <a class="navbar-link" href="#misc">Misc</a>
-                </li>
-                <li class="navbar-item">
-                    <a class="navbar-link" href="#text">Text</a>
                 </li>
             </ul>
         </div>
     </nav>
     <section class="header" id="intro">
-        <h2 class="title">Perfect Laplacians for Polygon Meshes</h2>
-        <p>We consider general polygonal meshes in the plane that admit an orthogonal dual with prescribed dual/primal
-edge length ratios as they directly provide perfect discrete Laplace-Beltrami operators. Given a set of edge length
-ratios, we provide conditions for the existence of a planar embedding. Moreover, we present a simple yet powerful
-optimization scheme for obtaining a mesh with an orthogonal dual that approximates a given mesh. The applications are manifold: our approach directly supports the computation of self-supporting surfaces with arbitrarily
-shaped tiles. It can also be applied to polygonal meshes in 3-dimensional space by defining the tangent spaces of
-vertices. For such meshes we can provide approximations that possess positive Laplace-Beltrami operators useful
-for applications that require the maximum principle.</p>
+        <h2 class="title">Position Based Dynamics - Real-time Physics Approximation</h2>
+        <p>The market for real-time applications in the entertainment industry is increasing rapidly. Computer games and movies try to attract costumers with realistic looking graphics. One important aspect of
+creating the illusion of realistic looking applications is the simulation of the physically proper behaviour of objects in these products. On the other side, simulating physics according to the physical laws is heavily computational intensive. The Position Based Dynamics approach approximates real physics by describing the physical behaviour of an object by working on positions instead of velocities or acceleration. Further, the physical behaviour of objects is described by a set of constraints. Those constraints are then linearized to reduce the simulation of physics to solving a linear system.</p>
     </section>
-    <div class="docs-section" id="results">
+    <div class="docs-section" id="physics">
+        <h3 class="section-heading">Physics of Motion</h3>
+        <p class="section-description">The foundation of classical mechanics in physics is described by Newtons laws. The observations of the three laws of Newton are repeated in Figure 1.
+            <div style="border:1px solid black">
+                First law: "Every body persists in its state of being at rest or of moving uniformly straight forward, except insofar as it is compelled to change its state by force impressed."</br></br>
+                Second law: "The alteration of motion is ever proportional to the motive force impress'd; and is made in the direction of the right line in which that force is impress'd."</br></br>
+                Third law: "To every action there is always opposed an equal reaction: or the mutual actions of two bodies upon each other are always equal, and directed to contrary parts."
+            </div>
+            <p>
+                Figure 1: The three laws of Newton.
+            </p>
+
+            In classical mechanics, the observations of the second law are used to formulate the equations of motions, velocity and acceleration. The position of a particle as a function of time. The first
+            derivation of this position function is the velocity of the particles. The velocity is described as a first order differential equation. The second derivation of the position is the acceleration of
+            a particle. Analog to the velocity function, the acceleration function is described as a second order differential equation of the position. The mathematical formulations of those three functions
+            are shown Figure 2:</br></br>
+            <div style="border:1px solid black">
+                Position: <img src="images/position.gif"></img></br></br>
+                Velocity: <img src="images/velocity.gif"></img></br></br>
+                Acceleration: <img src="images/acceleration.gif"></br>
+            </div>
+            <p>
+                Figure 2: Equations of motions from the classical mechanics.
+            </p>
+
+            In most cases of application, the position function and the velocity function is not given explicitly but the acceleration function. Thus, a twice integration of the acceleration function is needed,
+            to get the position of a particle.
+        </p>
+    </div>
+
+    <div class="docs-section" id="pbd">
+        <h3 class="section-heading">Position Based Dynamics</h3>
+        <p>
+            To avoid a twice integration, the Position Based Dynamics approach works on position estimates of particles instead on velocities and accelerations. The particles consist of a position and mass.
+            The physical integrity of an object is ensured due to the introduction of constraints. These constraints can be as simple as keeping the same distance between two vertices and as complex as one can
+            imagine. After calculating the estimated position of a particle, a set of constraints can be violated. The constraints are linearized and then solved with a linear solver to calculate the final
+            positions of a particle . After this, velocities are computed from the old position and the new position, to calculate a new estimate for the next step. The algorithm as presented in the original
+            work of Müller et al. is shown in Figure 3.
+            <div align=center>
+                <img src="images/PBD.png">
+                <p>
+                    Figure 3: Position Based Dynamics algorithm as shown<br> in the work of Müller et. al.
+                </p>
+            </div>
+            The constraints are a key element of the Position Based Dynamics algorithm. A constraint in Position Based Dynamics consists of a multidimensional function of type equality or inequality
+            with a scalar codomain, a stiffness parameter and a set of vertices to operate on. The definition of a constraint as presented in the original work of Müller et
+            al. is shown in Figure 4. The cardinality of a constraint describes how much particles are affected by a constraint. Most of the equality
+            constraints define the internal physical behaviour of an object. An example of internal physical behaviour can be given with the stretchiness of a cloth. On the other side, most inequality
+            constraints are used for collisions between environment and other objects. An example of collision constraints can be given with distance between a plane and a particle. The stiffness describes the
+            weight of a constraint. With the stiffness parameter, it is possible to model the compression or stretching of a cloth. 
+            <div align=center>
+                <img src="images/constraint.png">
+                <p>
+                Figure 4: Definition of a Constraint as shown in the original work of Müller et. al.
+                </p>
+            </div>
+            The constraint functions can be arbitrarily complex, but solving a non-linear and non-symmetric system is a computationally intensive task. The Position Based Dynamics approach linearizes the 
+            constraints To speed up the solving of the resulting system of constraints. The cost of the linearization is a loss of exactness. For the linearization, the gradient of the constraint function is
+            used. Also, Position Based Dynamics assumes, that the correction to solve the system is done along the gradients of the constraint function. Figure 5 shows the approximation.<br><br>
+            <div align="center">
+                <img src="images/approx.gif">
+                <p>
+                    Figure 5: Approximation of Constraint function with the gradient.
+                </p>
+            </div>
+            By restricting the correction <img src="images/dp.gif"> of constraints onto the direction of the gradient, we get <img src="images/lagrange.gif"> as a LaGrange multiplier.
+            Substituting <img src="images/dp.gif"> in our linearization with the LaGrange multiplier, solving for <img src="images/lambda.gif"> and inserting lambda back into the LaGrange multiplier, 
+            yields the final correction vector. The single steps are shown in Figure 6. The last formula in Figure 6 corresponds to a Newton step, which we can use in our Gauss-Seidel type solver to
+            solve our constraints.<br><br>
+            <div align="center">
+                <img src="images/insert1.gif"><br>
+                <img src="images/insert2.gif"><br>
+                <img src="images/insert3.gif">
+                <p>
+                    Figure 6: Inserting the LaGrange multiplier into <br>the approximation in step 1 and solving for <img src="images/lambda.gif"> in step 2.<br> Inserting back into the LaGrange multiplier in
+                    step 3.
+                </p>
+            </div>
+            The Gauss-Seidel type solver has compared to a Jacobi solver the advantage, that it converges in fewer iterations to the real solution and due to instant updating of the result vector, forces are
+            propagated. The drawback of the Gauss-Seidel solver in comparison to a Jacobi solver is that the Gauss-Seidel type solver in its pure form is not parallel. The Gauss-Seidel method
+            works as described in Figure 7.<br><br>
+            <div style="border:1px solid black">
+            <img src="images/gauss_seidel.png">
+            </div>
+            <p align="center">
+                Figure 7: Gauss-Seidel algorithm.
+            </p>
+            In Position Based Dynamics, not always all constraints can be fulfilled. This can lead to different results when the system is solved in a different order. A Another conclusion from the possibility
+            that the system may not solvable is, that we may never reach a distance between the old and new solution that is smaller than a specified delta. Therefore, we are just iterating a specified amount
+            of times over the constraints and are using the result of the last iteration as our new positions.
+        </p>
+    </div>
+    <div>
+        <h3 class="section-heading">Specific Constraints</h3>
+        <p>
+            The theoretical discussion above is demonstrated in this section on the distance constraint, plane-point collision constraint, sphere-point collision constraint and cloth balloon constraint.
+            <h4>Distance Constraint</h4>
+            <p>
+                The distance constraint is used to ensure the size of a cloth. Further, it is used for simulating stretching and compression of cloth. This constraint compares the actual length with the
+                original length of an edge between two points. The constraint is of type inequality to achieve this. The mathematical formulation of this constraint is shown in Figure 8.
+                <div>
+                    <img src="images/distance_c.gif">
+                </div>
+                <p>
+                    Figure 8: Distance constraint.
+                </p>
+                In the original work of Müller et al. This constraint uses the same stiffness parameter for stretching and compression. Two different stiffness parameters have to be used to simulate different
+                behaviour for stretching and compression. If the actual length of the edge is smaller than the original edge, the stiffness parameter for stretching needs to be used, else the compression
+                parameter for compression needs to be used. The mathematical formulation of this decision is shown in Figure 9.<br><br>
+                <div>
+                    <img src="images/k_stretch_decision.gif"><br>
+                    <img src="images/k_compress_decision.gif">
+                </div>
+                <p>
+                    Figure 9: Stretch-compression decision.
+                </p>
+                Calculating the gradients of the distance constraint for the parameters x1 and x2 yields the results shown in Figure 10.
+                <div>
+                    <img src="images/grad_dist_x1.gif"><br>
+                    <img src="images/grad_dist_x2.gif">
+                </div>
+                <p>
+                    Figure 10: Gradients of distance constraint.
+                </p>
+                Knowing the gradients of the distance constraint, the general formula for correction vectors as shown in Figure 6 can be used to calculate our final correction vectors for the distance constraint
+                as is shown in Figure 11.
+                <div>
+                    <img src="images/corr_dist_x1.gif"><br>
+                    <img src="images/corr_dist_x2.gif">
+                </div>
+                <p>
+                    Figure 11: Final correction vectors of distance constraint.
+                </p>
+            </p>
+            <h4>Plane-Point Constraint</h4>
+                <p>
+                The Plane-Point constraint is used to simulate a collision between a plane and an object. The Sphere-Point constraint is formulated as the distance function between plane and particle.
+                The Hessian normal form is used to calculate the distance between point and plane. The normal of the plane shows into the direction of the plane, which is defined as outside. The constraint
+                is of type inequality since it models a collision between object and environment and object. An object consists of many particles so that many particles of an object can be affected by a
+                collision. A particle of an object can be outside the plane, on the surface of the plane or inside the plane. The mathematical formulation of this observation is shown in Figure 12.
+                <div>
+                <img src="images/plane_outside.gif"><br>
+                <img src="images/plane_surface.gif"><br>
+                <img src="images/plane_inside.gif"><br>
+                </div>
+                <p>
+                    Figure 12: Possible relations between particle and plane.
+                </p>
+                A collision occurs, when the particle resides in the half-room, which is not defined as outside by the normal. For every collision candidate, a constraint is added into the solver, such
+                that the particle has to be on the surface of the plane. The final correction vector for a particle is calculated analog to the example of the distance constraint and is shown in Figure 13.
+                <br><br>
+                <div>
+                </div>
+                <p>
+                    Figure 13: Correction vectors for the Sphere-Plane constraint.
+                </p>
+                </p>
+            <h4>Sphere-Point Constraint</h4>
+                <p>
+                The Sphere-Point constraint is used to simulate a collision between a sphere and an object. The Sphere-Point constraint is formulated as the distance function between the center of the sphere
+                and the point. The sphere-point constraint is of type inequality since it models a collision between environment and object. An object consists of many particles so that many particles of an
+                object can be affected by a collision. There are three possible relative positions of a particle to a sphere. The particle can be outside the sphere, touching the surface of a sphere or inside
+                a sphere. The mathematical formulation of this observation is shown in Figure 12. 
+                <div>
+                <img src="images/sphere_outside.gif"><br>
+                <img src="images/sphere_surface.gif"><br>
+                <img src="images/sphere_inside.gif"><br>
+                </div>
+                <p>
+                    Figure 14: Possible relations between particle and sphere.
+                </p>
+                A collision occurs, if a particle is inside the sphere. So the first step is to search for potential collision candidates. For every collision candidate, we add a constraint into the 
+                solver, such that the particle has to be on the surface of the sphere. The final correction vector is calculated analog to the example of the distance constraint and is shown in Figure 13.
+                <br><br>
+                <div>
+                </div>
+                <p>
+                    Figure 15: Correction vectors for the Sphere-Point constraint.
+                </p>
+            </p>
+            <h4>Clothbaloon Constraint</h4>
+                <p>
+                The cloth balloon constraint compares the actual volume of an object with the original volume of an object. For the application of the cloth balloon constraint, the object has to be closed. The
+                original volume is multiplied by a pressure coefficient to simulate loss in pressure or gain in pressure. A pressure coefficient of 1 ensures that the original volume of the object is
+                maintained. A pressure coefficient that is greater than 1 pumps up an object, whereas a pressure coefficient of smaller than 1 simulates the opposite behaviour.  The cloth balloon constraint is
+                of type equality to ensure the internal integrity of the object. Since all particles are affected by the constraint, the cardinality of this constraint is equal to the number of particles of the
+                object. The mathematical formulation of the cloth balloon constraint is shown in Figure 14. 
+                <div>
+                    <img src="images/baloon_constr.gif"><br>
+                </div>
+                <p>
+                    Figure 16: Cloth balloon constraint.
+                </p>
+            </p>
+        </p>
+    </div>
+    <div id="impl">
+        <h3 class="section-heading">Implementation</h3>
+        <p>
+            For the implementation of this work C++ and Qt5 in combination with OpenGL 3.3 was used. Qt5 was used for the GUI and input management, whereas OpenGL with a Core Profile was used for the
+            rendering. The implementation offers three scenes. Each scene is lit by three light sources and the shading model used was Phong Shading. The first scene allows shooting spheres onto a cloth, which
+            reacts to the collision with the sphere. The second scene shows a cloth that is falling onto the ground and folds itself. The third scene simulates a cloth balloon, which can be pumped. The 
+            compression, stretching parameters for the cloth can be changed in realtime. Further, the pressure parameter of the cloth balloon constraint can be changed in realtime. The implementation uses a
+            non-parallelized Gauss-Seidel solver for solving the constraints. A video of the implementation showing all three scenes can be seen in the video of Figure 8.<br><br>
+            The code of the implementation is hosted in the following bitbucket repository: <br>
+           <a href="https://bitbucket.org/wleuschner/pbd-simulation.git">https://wleuschner@bitbucket.org/wleuschner/pbd-simulation.git</a>
+            <div>
+                <video src="videos/screencast2.webm" controls autobuffer></video>
+            <div>
+            <p>
+                Figure 17: Video showing the three scenes of the implementation.
+            </p>
+        </p>
+    </div>
+    <div>
         <h3 class="section-heading">Results</h3>
-        <p class="section-description">We consider general polygonal meshes in the plane that admit an orthogonal dual with prescribed dual/primal
-edge length ratios as they directly provide perfect discrete Laplace-Beltrami operators.</p>
-        <div class="row">
-            <div class="one-half column category" style="text-align: center;">
-                <h5 class="docs-header">Image 1</h5>
-                <img class="u-max-full-width" src="images/flow.gif">
-                    <p>We consider general polygonal meshes in the plane that admit an orthogonal dual with prescribed dual/primal
-edge length ratios as they directly provide perfect discrete Laplace-Beltrami operators.</p>
-                </div>
-                <div class="one-half column category" style="text-align: center;">
-                    <h5 class="docs-header">Image 2</h5>
-                    <img class="u-max-full-width" src="images/flow.gif">
-                        <p>We consider general polygonal meshes in the plane that admit an orthogonal dual with prescribed dual/primal
-edge length ratios as they directly provide perfect discrete Laplace-Beltrami operators.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="docs-section" id="misc">
-                <h3 class="section-heading">Misc</h3>
-                <p class="section-description">We consider general polygonal meshes in the plane that admit an orthogonal dual with prescribed dual/primal
-edge length ratios as they directly provide perfect discrete Laplace-Beltrami operators.</p>
-                <div class="row">
-                    <div class="one-half column category" style="text-align: center;">
-                        <h5 class="docs-header">Table 1</h5>
-                        <table class="u-full-width">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Value</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Laplace</td>
-                                    <td>26</td>
-                                    <td>---</td>
-                                </tr>
-                                <tr>
-                                    <td>Beltrami</td>
-                                    <td>42</td>
-                                    <td>n/a</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="one-half column category" style="text-align: center;">
-                        <h5 class="docs-header">Table 2</h5>
-                        <table class="u-full-width">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Value</th>
-                                    <th>Description</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Laplace</td>
-                                    <td>26</td>
-                                    <td>---</td>
-                                </tr>
-                                <tr>
-                                    <td>Beltrami</td>
-                                    <td>42</td>
-                                    <td>n/a</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="docs-section" id="text">
-                <h3 class="section-heading">Text</h3>
-                <p class="section-description">We consider general polygonal meshes in the plane that admit an orthogonal dual with prescribed dual/primal edge length ratios as they directly provide perfect discrete Laplace-Beltrami operators.</p>
-                <pre>
-                    <code>def load_image(nr, flat=True):
-    img = io.imread(get_path(nr), as_grey=True)
-    if flat:
-        # print(img.shape)
-        img = img.reshape(-1)
-        # print(np.amin(img), np.amax(img))
-    print("Loaded img " + str(nr))
-    return img
-</code>
-                </pre>
-            </div>
-        </div>
+    </div>
+    <div>
+        <h3 class="section-heading">Extra: Parallelizing Position Based Dynamics</h3>
+    </div>
+    <div>
+        <h3 class="section-heading">References</h3>
+        <ul>
+            <li>
+                Müller, Matthias, et al. "Position based dynamics." Journal of Visual Communication and Image Representation 18.2 (2007): 109-118.
+            </li>
+            <li>
+                Bender, Jan, Matthias Müller, and Miles Macklin. "Position-Based Simulation Methods in Computer Graphics."
+            </li>
+        </ul>
     </div>
 </div>

@@ -25,19 +25,6 @@ Light::Light(QVector3D &pos, QVector3D &ambient, QVector3D &diffuse, QVector3D &
     this->ambient=QVector3D(ambient);
     this->diffuse=QVector3D(diffuse);
     this->specular=QVector3D(specular);
-
-    glGenBuffers(1,&framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    glGenTextures(1,&shadowmap);
-    glBindTexture(GL_TEXTURE_2D,shadowmap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16,1024,1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowmap, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, NULL);
-    glBindTexture(GL_TEXTURE_2D,0);
 }
 
 void Light::setPosition(QVector3D& pos)
@@ -82,16 +69,10 @@ const QVector3D& Light::getSpecular()
 
 void Light::beginShadowmap()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    glBindTexture(GL_TEXTURE_2D,shadowmap);
-    glDrawBuffer(GL_NONE);
 }
 
 void Light::endShadowmap()
 {
-    glDrawBuffer(GL_FRONT_AND_BACK);
-    glBindTexture(GL_TEXTURE_2D,0);
-    glBindFramebuffer(GL_FRAMEBUFFER, NULL);
 }
 
 void Light::addLight(Light* light)

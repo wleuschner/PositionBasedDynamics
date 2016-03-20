@@ -4,7 +4,6 @@
 #include <QGLWidget>
 #include <QKeyEvent>
 #include <QMatrix3x3>
-#include <CL/cl.h>
 #include "solvers/solver.h"
 #include "scenes/scene.h"
 #include "scenes/scene2.h"
@@ -35,7 +34,7 @@ void Canvas::initializeGL()
     glCullFace(GL_CCW);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
-    glClearColor(0.0,0.0,0.0,1.0);    
+    glClearColor(1.0,1.0,1.0,1.0);
 
     scene = new Scene(solver);
 

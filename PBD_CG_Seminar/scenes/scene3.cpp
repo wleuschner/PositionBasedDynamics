@@ -7,7 +7,7 @@ Scene3::Scene3(AbstractSolver* solver) : AbstractScene(solver)
     Material fmat = Material(QVector3D(0.24725,0.1995,0.0745),QVector3D(0.75164,0.60648,0.22648),QVector3D(0.628281,0.555802,0.366065),128);
     //Load Models and create Entitys
     Model* model = new Model();
-    model->load("/home/wladimir/Model/sphere/sphere.obj");
+    model->load("../Model/sphere/sphere.obj");
     QMatrix4x4 mat;
     mat.scale(10);
     model->setMaterial(mmat);
